@@ -1,0 +1,40 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+}
+
+.above-content {
+  background-color: yellow;
+  width: 100%;
+  height: 10%;
+  .box-news {
+    background-color: red;
+    width: 100%;
+    height: 100%;
+  }
+}
+.below-content {
+  background-color: orange;
+  width: 100%;
+  height: 90%;
+  display: flex;
+
+  .box-power-outage {
+    background-color: blue;
+    width: 50%;
+    height: 100%;
+  }
+  .box-map {
+    background-color: green;
+    width: 50%;
+    height: 100%;
+  }
+}
