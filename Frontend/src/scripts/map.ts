@@ -1,3 +1,5 @@
+/// <reference types="google.maps" />  
+
 export async function initMap(elementId: string) {
 
     const portoAlegre = {
