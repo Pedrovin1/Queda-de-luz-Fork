@@ -1,11 +1,10 @@
 <script setup lang="ts">
-  import { onMounted } from 'vue';
-  import {initMap} from './scripts/map.ts';
+import { onMounted } from 'vue'
+import { initMap } from './scripts/map.ts'
 
-  onMounted(async () => {
-    await initMap('map-canvas');
-  });
-
+onMounted(async () => {
+  await initMap('map-canvas')
+})
 </script>
 
 <style lang="scss">
