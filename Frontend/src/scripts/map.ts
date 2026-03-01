@@ -14,6 +14,64 @@ export async function initMap(elementId: string) {
 
   const map = document.getElementById(elementId)
 
+  const darkMode : google.maps.MapTypeStyle[] = [
+    {
+        elementType: "geometry", stylers: [{ color: "#242f3e"}]
+    },
+    {
+        elementType: "labels.text.stroke", stylers: [{ color: "#242f3e"}]
+    },
+    {
+        elementType: "labels.text.fill", stylers: [{ color: "#746855"}]
+    },
+    {
+        featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563"}]
+    },
+    {
+        featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563"}]
+    },
+    {
+        featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#263c3f"}]
+    },
+    {
+        featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#6b9a76"}]
+    },
+    {
+        featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e"}]
+    },
+    {
+        featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37"}]
+    },
+    {
+        featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3"}]
+    },
+    {
+        featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#746855"}]
+    },
+    {
+        featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#1f2835"}]
+    },
+    {
+        featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#f3d19c"}]
+    },
+    {
+        featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c"}]
+    },
+    {
+        featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d"}]
+    },
+    {
+        featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#17263c"}]
+    },
+    {
+        featureType: "poi", stylers: [{ visibility: "off" }]
+    },
+    {
+        featureType: "transit", stylers: [{ visibility: "off" }]
+    }
+  ]
+
+
   if (map) {
     const mapOutput = new Map(map, {
       center: { lat: -30.0351, lng: -51.17195 },
@@ -24,19 +82,10 @@ export async function initMap(elementId: string) {
         latLngBounds: portoAlegre,
         strictBounds: false,
       },
-      styles: [
-        {
-          featureType: 'poi',
-          stylers: [{ visibility: 'off' }],
-        },
-        {
-          featureType: 'transit',
-          stylers: [{ visibility: 'off' }],
-        },
-      ],
+      styles: darkMode,
       mapTypeControl: false,
       streetViewControl: false,
-      fullscreenControl: true,
+      fullscreenControl: false,
     })
 
     try {
