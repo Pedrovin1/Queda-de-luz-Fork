@@ -97,8 +97,8 @@ export async function initMap(elementId: string) {
 
   const map = document.getElementById(elementId)
 
-  const city = 'Porto Alegre'
-  const neighborhood = ['Bela Vista', 'Auxiliadora']
+  const city: string = 'Porto Alegre'
+  const neighborhood: string[] = []
 
   const [boundsCity, outlineCity] = await Promise.all([
     fetchCityBounds(city),
