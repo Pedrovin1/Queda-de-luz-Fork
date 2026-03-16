@@ -93,21 +93,21 @@ body,
   .button-chat-outside {
     position: absolute;
     top: 82%;
-    right:5px;
+    right: 5px;
     z-index: 3;
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: rgba(204,195,195,0.85);
+    background: rgba(204, 195, 195, 0.85);
     cursor: pointer;
-    border: 1px solid rgba(255,255,255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     justify-content: center;
     align-items: center;
     transition: all 0.3 ease;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     &:hover {
-      background-color: rgba(204,195,195,1);
+      background-color: rgba(204, 195, 195, 1);
       box-shadow: 0 6px 20px rgba(94, 91, 91, 0.7);
       transform: translateY(-2px);
     }
@@ -217,12 +217,11 @@ body,
     z-index: 1;
     @include display-on-center;
   }
-  
-  .box-chat{
 
+  .box-chat {
     color: white;
-    background-color: rgba(15,15,15,0.85);
-    border:1px solid rgba(255,255,255,0.1);
+    background-color: rgba(15, 15, 15, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
 
     width: 25%;
@@ -241,27 +240,29 @@ body,
 
     &.isHidden {
       opacity: 0;
-      pointer-events: none; 
+      pointer-events: none;
       transform: translateY(2%) translateX(2%);
     }
 
-    .box-chat-header{
+    .box-chat-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid rgba(255,255,255,0.2);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
       padding-bottom: 10px;
       margin-bottom: 15px;
     }
     .box-chat-button {
       background: none;
-      border:none;
-      color:white;
+      border: none;
+      color: white;
       font-size: 1.2rem;
-      cursor:pointer;
-      &:hover { color: red }
+      cursor: pointer;
+      &:hover {
+        color: red;
+      }
     }
-    .box-chat-messages{
+    .box-chat-messages {
       flex-grow: 1;
       overflow-y: auto;
       display: flex;
@@ -276,30 +277,30 @@ body,
         border-radius: 8px;
         font-size: 0.9rem;
       }
-
     }
-    .box-chat-input{
+    .box-chat-input {
       display: flex;
       gap: 10px;
 
       input {
         flex-grow: 1;
-        background: rgba(255,255,255,0.1);
+        background: rgba(255, 255, 255, 0.1);
         border: none;
         padding: 10px;
         border-radius: 8px;
         color: white;
-        &:focus{ outline: 1px solid orange;}
+        &:focus {
+          outline: 1px solid orange;
+        }
       }
       button {
-        background: orange;
-        border:none;
+        background: red;
+        border: none;
         padding: 0 15px;
         border-radius: 8px;
-        cursor:pointer;
+        cursor: pointer;
         font-weight: bold;
       }
     }
   }
-
 }

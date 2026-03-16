@@ -6,12 +6,22 @@ const openMenu = ref(true)
 const openChat = ref(true)
 const newMessage = ref('')
 
+const messages = ref([{ user: 'Test', text: 'Mensagem de teste.' }])
+
 const sendMessage = () => {
-  if(newMessage.value.trim()) {
-    newMessage.value= '';
+  if (newMessage.value.trim()) {
+    messages.value.push({
+      user: 'Usuario',
+      text: newMessage.value,
+    })
+    newMessage.value = ''
+
+    setTimeout(() => {
+      const chatContainer = document.querySelector('.box-chat-messages')
+      if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight
+    }, 50)
   }
 }
-
 
 onMounted(async () => {
   await initMap('map-canvas')
@@ -43,15 +53,15 @@ onMounted(async () => {
       </ul>
     </div>
     <div class="box-map" id="map-canvas"><h1>Map</h1></div>
-    <div class="box-chat" :class="{ 'isHidden': !openChat}">
+    <div class="box-chat" :class="{ isHidden: !openChat }">
       <div class="box-chat-header">
-        <h2 class="box-chat-header-h2">
-          CHAT COMUNITARIO
-        </h2>
+        <h2 class="box-chat-header-h2">CHAT COMUNITARIO</h2>
         <button class="box-chat-button" @click="openChat = false">X</button>
       </div>
       <div class="box-chat-messages">
-        <div class="message"><strong>User:</strong> Ta sem luz</div>
+        <div v-for="(msg, index) in messages" :key="index" class="message">
+          <strong>{{ msg.user }}: </strong>{{ msg.text }}
+        </div>
       </div>
       <div class="box-chat-input">
         <input
