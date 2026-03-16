@@ -39,7 +39,7 @@ export const fetchCityBounds = async (cityName: string): Promise<CityBounds> => 
   }
 }
 
-export const fetchCityOutline = async (cityName: string,): Promise<google.maps.LatLngLiteral[][]> => {
+export const fetchCityOutline = async (cityName: string): Promise<google.maps.LatLngLiteral[][]> => {
   const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityName)}&format=json&polygon_geojson=1&limit=1`
 
 

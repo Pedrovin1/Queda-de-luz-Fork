@@ -1,5 +1,6 @@
 /// <reference types="google.maps" />
 import { createCityMask, fetchCityBounds, fetchCityOutline } from './cityMap'
+import { neighborhoodOutlines } from './neighborhoodMap'
 
 const darkMode: google.maps.MapTypeStyle[] = [
   {
@@ -97,6 +98,7 @@ export async function initMap(elementId: string) {
   const map = document.getElementById(elementId)
 
   const city = 'Porto Alegre'
+  const neighborhood = ['Bela Vista', 'Auxiliadora']
 
   const [boundsCity, outlineCity] = await Promise.all([
     fetchCityBounds(city),
@@ -120,6 +122,8 @@ export async function initMap(elementId: string) {
     })
 
     createCityMask(mapOutput, outlineCity)
+
+    await neighborhoodOutlines(mapOutput, neighborhood, city)
 
     return mapOutput
   }
