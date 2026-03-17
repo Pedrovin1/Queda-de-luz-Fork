@@ -27,9 +27,25 @@ public class CidadeService : ICidadeService
         return cidade;
     }
 
+    public async Task<List<long>?> GetCidadeAsync(int id)
+    {
+        using var dbContext = await this._dbConnectionFactory.CreateConnectionAsync();
+
+        var result = await dbContext.QueryAsync<long>(
+            """
+            SELECT Cidade_Id
+            FROM Cidade
+            """
+        );
+
+        await dbContext.CloseAsync();
+
+        return result.ToList();
+    }
 }
 
 public interface ICidadeService
 {
     public Task<Cidade> CreateCidadeAsync(Cidade cidade);
+    public Task<List<long>?> GetCidadeAsync(int id);
 }

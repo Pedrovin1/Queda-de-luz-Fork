@@ -26,10 +26,14 @@ public class CidadeController : ControllerBase
     }
 
     [HttpGet("/cidade/{id}")]
-    public async Task<IActionResult> GetCidadeAsync(CreateCidadeRequest request, int id)
+    public async Task<IActionResult> GetCidadeAsync(int id)
     {
-        CreateCidadeResponse response = new(1,"a","b");
+        var cidades = await this._cidadeService.GetCidadeAsync(id);
 
-        return Ok(response);
+        if(cidades is null){ return NotFound(); }
+
+        //var response = new GetCidadeResponse(cidade.Id, cidade.Nome, cidade.EstadoSigla);
+
+        return Ok(cidades);
     }
 }

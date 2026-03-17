@@ -4,11 +4,13 @@ public class Cidade
     public string Nome {get; private set;}
     public string EstadoSigla {get; private set;}
 
-    public Cidade(int id, string nome, string estadoSigla)
+    public Cidade(){}
+
+    public Cidade(long Id, string Nome, string EstadoSigla)
     {
-        this.Id = id;
-        this.Nome = nome;
-        this.EstadoSigla = estadoSigla;
+        this.Id = (int)Id;
+        this.Nome = Nome;
+        this.EstadoSigla = EstadoSigla;
     }
 
     public Cidade(string nome, string estadoSigla)
