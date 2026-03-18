@@ -3,21 +3,21 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS Problem_Category (
                 Problem_Category_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 Problem_Category_Name TEXT NOT NULL CHECK(length(Problem_Category_Name) <= 50)
-); ---------------------------------------------------------------------------------------------
+) ; ---------------------------------------------------------------------------------------------
 
 
 CREATE TABLE IF NOT EXISTS City (
                 City_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 City_Name TEXT NOT NULL CHECK(length(City_Name) <= 50),
                 State_Abbreviation TEXT NOT NULL CHECK(length(State_Abbreviation) <= 10)
-); ---------------------------------------------------------------------------------------------
+) ; ---------------------------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS District (
                 District_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 District_Name TEXT NOT NULL CHECK(length(District_Name) <= 50),
                 City_id INTEGER NOT NULL,
 				FOREIGN KEY (City_id) REFERENCES City(City_id)
-); ---------------------------------------------------------------------------------------------
+) ; ---------------------------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS Base_Account (
                 Base_Account_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -26,29 +26,29 @@ CREATE TABLE IF NOT EXISTS Base_Account (
                 Email TEXT NOT NULL CHECK(length(Email) <= 100),
                 Description TEXT CHECK(length(Description) <= 500),
                 Profile_picture_link TEXT,
-                UTC_datetime_creation INTEGER DEFAULT( CURRENT_TIMESTAMP ) NOT NULL, --UTC
+                UTC_datetime_creation INTEGER DEFAULT( unixepoch('now') ) NOT NULL, --UTC
                 advertisement_slots_amount INTEGER DEFAULT 0 NOT NULL,
                 District_id INTEGER NOT NULL,
                 FOREIGN KEY(District_id) REFERENCES District(District_id)
-); ---------------------------------------------------------------------------------------------
+) ; ---------------------------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS Person_Account (
                 Person_Account_id INTEGER PRIMARY KEY NOT NULL,
                 Birthday TEXT NOT NULL CHECK( Birthday IS date(Birthday) ), -- 'YYYY-MM-DD' (ISO 8601)
                 Informal_Work TEXT CHECK( length(Informal_Work) <= 50 ),
                 FOREIGN KEY (Person_Account_id) REFERENCES Base_Account(Base_Account_id)
-); ---------------------------------------------------------------------------------------------
+) ; ---------------------------------------------------------------------------------------------
 
 
 CREATE TABLE IF NOT EXISTS Report (
                 Report_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                UTC_Date_Report INTEGER DEFAULT( CURRENT_TIMESTAMP ) NOT NULL, --UTC
+                UTC_Date_Report INTEGER DEFAULT( unixepoch('now') ) NOT NULL, --UTC
 				
                 Problem_Category_id INTEGER NOT NULL,
                 Reported_District_id INTEGER NOT NULL,
-                Base_Account_id INTEGER NOT NULL,
+                Base_Account_id INTEGER, -- an account is not required to make a report
                 
 				FOREIGN KEY(Problem_Category_id) REFERENCES Problem_Category(Problem_Category_id),
 				FOREIGN KEY(Reported_District_id) REFERENCES District(District_id),
 				FOREIGN KEY(Base_Account_id) REFERENCES Base_Account(Base_Account_id)
-); ---------------------------------------------------------------------------------------------
+) ; ---------------------------------------------------------------------------------------------

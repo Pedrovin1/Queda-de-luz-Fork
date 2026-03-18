@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
-builder.Services.AddScoped<ICidadeService, CidadeService>();
+builder.Services.AddScoped<IHomePageService, HomePageService>();
 
 //To Avoid Wasting Time for a prototype
 const string AllowAllPolicyName = "AllowAll";
