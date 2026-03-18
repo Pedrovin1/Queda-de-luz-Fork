@@ -10,5 +10,5 @@ Content-Type: application/json
 }
 
 
-GET {{BlackoutMap_HostAddress}}/cidade/3
+GET {{BlackoutMap_HostAddress}}/homepage/city/1/districts
 Accept: application/json
