@@ -46,8 +46,9 @@ public class HomePageService : IHomePageService
     {
         using var dbContext = await this._dbConnectionFactory.CreateConnectionAsync();
 
+        //Create a report in the database
         Report result = await dbContext.QuerySingleAsync<Report>(
-            $"""
+            """
             INSERT INTO Report (Problem_Category_id, Reported_District_id, Base_Account_id) 
             VALUES (@ProblemCategory_Id, @District_Id, @AccountId) 
             RETURNING *;
@@ -55,6 +56,14 @@ public class HomePageService : IHomePageService
             new{ ProblemCategory_Id = report.ProblemCategoryId, 
                  District_Id = report.ReportedDistrictId,
                  AccountId = report.AccountId is not null ? report.AccountId : null}
+        );
+
+        //"add" the recently created report to the recent reports table
+        await dbContext.ExecuteAsync(
+            """
+            INSERT INTO Recent_Report (Report_id) VALUES (@reportId);
+            """,
+            new{ reportId = result.Id }
         );
 
         await dbContext.CloseAsync();

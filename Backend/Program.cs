@@ -37,7 +37,7 @@ if (!Directory.Exists(DatabaseDirectory) || !File.Exists(DatabaseDirectory + Dat
 
     var connFactory = new BlackoutMapConnectionFactory(connectionString);
     
-    var DB_Generator = await connFactory.CreateConnectionAsync();
+    using var DB_Generator = await connFactory.CreateConnectionAsync();
     string sqlCreate = await File.ReadAllTextAsync(DBCreationSqlPath);
 
     await DB_Generator.ExecuteAsync(sqlCreate);
