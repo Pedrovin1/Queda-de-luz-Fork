@@ -449,3 +449,63 @@ body,
     }
   }
 }
+
+.user-location-container {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  
+  .user-location-dot {
+    width: 12px;
+    height: 12px;
+    background-color: #4285F4; 
+    border: 2px solid white;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+  }
+
+  .user-location-balloon {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 30px; 
+    background-color: #4285F4;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    pointer-events: none;
+    z-index: 10;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px;
+      border-style: solid;
+      border-color: #4285F4 transparent transparent transparent;
+    }
+  }
+
+  .user-location-pulse {
+    width: 20px;
+    height: 20px;
+    background-color: rgba(66, 133, 244, 0.4);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
