@@ -1,19 +1,19 @@
 @BlackoutMap_HostAddress = http://localhost:5176
 
 
-POST {{BlackoutMap_HostAddress}}/homepage/city/1/district/1/reports
+POST {{BlackoutMap_HostAddress}}/homepage/cities/1/districts/1/reports
 Content-Type: application/json
 
 {
-    "Is_Fixed": false,
+    "Is_Fixed": true,
     "Problem_Category_id" : 1,
     "Account_id" : null
 }
 
 
-GET {{BlackoutMap_HostAddress}}/homepage/city/1/districts
+GET {{BlackoutMap_HostAddress}}/homepage/cities/1/districts
 Accept: application/json
 
 
-GET {{BlackoutMap_HostAddress}}/homepage/city/1/statistics
+GET {{BlackoutMap_HostAddress}}/homepage/cities/1/statistics
 Accept: application/json

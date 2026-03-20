@@ -13,7 +13,7 @@ public class HomePageController : ControllerBase
     }
 
     [HttpGet]
-    [Route("city/{city_id}/districts")]
+    [Route("cities/{city_id}/districts")]
     public async Task<IActionResult> GetDistrictsAsync(int city_id)
     {
         List<District> districts = await this._homePageService.GetDistrictsAsync(city_id);
@@ -26,7 +26,7 @@ public class HomePageController : ControllerBase
 
 
     [HttpPost]
-    [Route("city/{city_id}/district/{district_id}/reports")]
+    [Route("cities/{city_id}/districts/{district_id}/reports")]
     public async Task<IActionResult> PostReportAsync(int city_id, int district_id, PostReportRequest request)
     {
         //<<TODO: to validate city--district relation>>
@@ -42,7 +42,7 @@ public class HomePageController : ControllerBase
     }
 
     [HttpGet]
-    [Route("city/{city_id}/statistics")]
+    [Route("cities/{city_id}/statistics")]
     public async Task<IActionResult> GetCityStatistics(int city_id)
     {
         //<<TODO: to validate city existence>>
