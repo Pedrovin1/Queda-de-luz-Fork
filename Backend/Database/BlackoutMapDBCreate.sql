@@ -44,6 +44,8 @@ CREATE TABLE IF NOT EXISTS Report (
                 Report_id INTEGER PRIMARY KEY,
                 UTC_Date_Report INTEGER DEFAULT( unixepoch('now') ) NOT NULL, --UTC
 				
+                Is_Fixed BOOLEAN DEFAULT(FALSE) NOT NULL, 
+
                 Problem_Category_id INTEGER NOT NULL,
                 Reported_District_id INTEGER NOT NULL,
                 Base_Account_id INTEGER, -- an account is not required to make a report

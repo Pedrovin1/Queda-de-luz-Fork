@@ -1,4 +1,5 @@
 using System.Data.SQLite;
+using System.Runtime.CompilerServices;
 using Dapper;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 
@@ -49,11 +50,12 @@ public class HomePageService : IHomePageService
         //Create a report in the database
         Report result = await dbContext.QuerySingleAsync<Report>(
             """
-            INSERT INTO Report (Problem_Category_id, Reported_District_id, Base_Account_id) 
-            VALUES (@ProblemCategory_Id, @District_Id, @AccountId) 
+            INSERT INTO Report (Is_Fixed, Problem_Category_id, Reported_District_id, Base_Account_id) 
+            VALUES (@IsFixed, @ProblemCategory_Id, @District_Id, @AccountId) 
             RETURNING *;
             """,
-            new{ ProblemCategory_Id = report.ProblemCategoryId, 
+            new{ IsFixed = report.IsFixed,
+                 ProblemCategory_Id = report.ProblemCategoryId, 
                  District_Id = report.ReportedDistrictId,
                  AccountId = report.AccountId is not null ? report.AccountId : null}
         );
