@@ -26,7 +26,7 @@ public class HomePageController : ControllerBase
 
 
     [HttpPost]
-     [Route("city/{city_id}/district/{district_id}/reports")]
+    [Route("city/{city_id}/district/{district_id}/reports")]
     public async Task<IActionResult> PostReportAsync(int city_id, int district_id, PostReportRequest request)
     {
         //<<TODO: to validate city--district relation>>
@@ -38,6 +38,16 @@ public class HomePageController : ControllerBase
         PostReportResponse response = report.ToPostReportResponse();
         
         //<<TODO: to create a GET endpoint to access reports>>
+        return Ok(response);
+    }
+
+    [HttpGet]
+    [Route("city/{city_id}/statistics")]
+    public async Task<IActionResult> GetCityStatistics(int city_id)
+    {
+        //<<TODO: to validate city existence>>
+        GetCityStatisticsResponse response = await this._homePageService.GetCityStatistics(city_id);
+
         return Ok(response);
     }
 }
