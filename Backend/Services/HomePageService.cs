@@ -1,8 +1,5 @@
 using System.Data.SQLite;
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime.CompilerServices;
 using Dapper;
-using Microsoft.AspNetCore.Mvc.ApplicationParts;
 
 public class HomePageService : IHomePageService
 {
@@ -81,7 +78,7 @@ public class HomePageService : IHomePageService
         string city_Name=string.Empty;
         Dictionary<int, DistrictStatistics> result = new();
 
-        _ = await dbContext.QueryAsync<string, District, ProblemCategory, long, bool>( //potential mapping bug because of the <alias.>columnName
+        _ = await dbContext.QueryAsync<string, District, ProblemCategory, long, bool>(
             """
             SELECT c.City_Name, 
                 dis.District_id, dis.District_Name, 
@@ -119,6 +116,34 @@ public class HomePageService : IHomePageService
         return new GetCityStatisticsResponse(city_Name, result);
     }
 
+    public async Task<GetCitiesResponse?> GetCitiesAsync(string state_abbreviation)
+    {
+        using var dbContext = await this._dbConnectionFactory.CreateConnectionAsync();
+
+        var result = await dbContext.QueryAsync<City>(
+            $"""
+            SELECT City_id, City_Name 
+            FROM City 
+            WHERE State_Abbreviation = '{state_abbreviation}'; 
+            """
+            //,
+            //new{ stateAbbreviation = state_abbreviation}
+        );
+
+        await dbContext.CloseAsync();
+
+        GetCitiesResponse? response = new(state_abbreviation, new());
+        foreach(City c in result)
+        {
+            response.Cities.Add( new GetCitiesResponse_City(c.Id, c.Name) );
+            //response.Cities.Add( (c.Id, c.Name) );
+        }
+
+        if(response.Cities is null || response.Cities.Count <= 0){ response = null; }
+
+        return response;
+    }
+
 }
 
 public interface IHomePageService
@@ -126,4 +151,5 @@ public interface IHomePageService
     public Task<List<District>> GetDistrictsAsync(int city_id);
     public Task<Report> PostReportAsync(Report report);
     public Task<GetCityStatisticsResponse> GetCityStatistics(int city_id);
+    public Task<GetCitiesResponse?> GetCitiesAsync(string state_abbreviation);
 }

@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS Report (
 				FOREIGN KEY(Base_Account_id) REFERENCES Base_Account(Base_Account_id)
 ) ; ---------------------------------------------------------------------------------------------
 
+
 CREATE TABLE IF NOT EXISTS Recent_Report( --Aux table to index specific (recent) reports
                                           --Most Statistics are pulled only from the reports of this table
 	Report_id INTEGER PRIMARY KEY NOT NULL,

@@ -17,3 +17,7 @@ Accept: application/json
 
 GET {{BlackoutMap_HostAddress}}/homepage/cities/1/statistics
 Accept: application/json
+
+
+GET {{BlackoutMap_HostAddress}}/homepage/states/RS/cities
+Accept: application/json

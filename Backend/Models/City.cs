@@ -18,4 +18,10 @@ public class City
         this.Name = City_Name;
         this.StateAbbreviation = State_Abbreviation;
     }
+
+    public City(long City_id, string City_Name)
+    {
+        this.Id = (int)City_id;
+        this.Name = City_Name;
+    }
 }

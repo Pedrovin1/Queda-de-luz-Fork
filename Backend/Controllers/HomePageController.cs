@@ -1,6 +1,4 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Routing;
 
 [ApiController]
 [Route("homepage")]
@@ -47,6 +45,19 @@ public class HomePageController : ControllerBase
     {
         //<<TODO: to validate city existence>>
         GetCityStatisticsResponse response = await this._homePageService.GetCityStatistics(city_id);
+
+        return Ok(response);
+    }
+
+
+    [HttpGet]
+    [Route("states/{state_abbreviation}/cities")]
+    public async Task<IActionResult> GetCitiesAsync(string state_abbreviation)
+    {
+        state_abbreviation = state_abbreviation.ToUpper();
+        GetCitiesResponse? response = await this._homePageService.GetCitiesAsync(state_abbreviation);
+
+        if(response is null){ return NotFound(); }
 
         return Ok(response);
     }
