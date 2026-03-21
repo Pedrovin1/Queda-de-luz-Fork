@@ -4,7 +4,7 @@ import { initMap } from './scripts/map.ts'
 import { fetchAllNeighborhoods } from './scripts/neighborhoodMap.ts'
 
 const city:string = 'Porto Alegre';
-const neighborhoods:string[] = ['Bela vista'];
+const neighborhoodsNoPower= ref<string[]>(['Bela Vista'])
 
 const openMenu = ref(true)
 const openChat = ref(true)
@@ -16,17 +16,17 @@ const loggedUser = ref(false)
 
 const messages = ref([{ user: 'Test', text: 'Mensagem de teste.' }])
 
-const portoAlegreNeighborhoods = ref<string[]>([])
+const neighborhoodsList = ref<string[]>([])
 
-const detectLocation = ref('Detectar...')
+const detectLocation = ref('')
 const putManualLocation = ref('')
 const isChangingReport = ref(false)
 const searchReportQuery = ref('')
 
-const displayNeighborhood = computed(() => detectLocation.value || putManualLocation.value)
+const displayNeighborhood = computed(() => detectLocation.value || putManualLocation.value || "Detectando...")
 
 const filteredNeighborhoods = computed(() =>
-  portoAlegreNeighborhoods.value.filter((n) =>
+  neighborhoodsList.value.filter((n) =>
     n.toLowerCase().includes(searchReportQuery.value.toLocaleLowerCase()),
   ),
 )
@@ -61,8 +61,8 @@ const sendMessage = () => {
 
 onMounted(async () => {
   const names = await fetchAllNeighborhoods(city)
-  portoAlegreNeighborhoods.value = names
-  await initMap('map-canvas', city, neighborhoods)
+  neighborhoodsList.value = names
+  await initMap('map-canvas', city, neighborhoodsNoPower.value)
 
   window.addEventListener('neighborhood-detected', (e: any) => {
     detectLocation.value = e.detail.name
@@ -113,11 +113,12 @@ onMounted(async () => {
         <button class="button-power-outage-inside" @click="openMenu = false">X</button>
       </div>
       <ul class="lista-bairros-sem-luz">
-        <li class="lista-items-bairros-sem-luz"><strong>Bairro sem luz 1</strong></li>
-        <li class="lista-items-bairros-sem-luz"><strong>Bairro sem luz 2</strong></li>
-        <li class="lista-items-bairros-sem-luz"><strong>Bairro sem luz 3</strong></li>
-        <li class="lista-items-bairros-sem-luz"><strong>Bairro sem luz 4</strong></li>
-        <li class="lista-items-bairros-sem-luz"><strong>Bairro sem luz 5</strong></li>
+        <li v-if="neighborhoodsNoPower.length === 0" class="lista-items-bairros-sem-luz">
+          <strong>Nenhum bairro reportado</strong>
+        </li>
+        <li v-for="n in neighborhoodsNoPower":key="n" class="lista-items-bairros-sem-luz">
+          <strong>{{ n }}</strong>
+        </li>
       </ul>
     </div>
     <div class="box-map" id="map-canvas"><h1>Map</h1></div>

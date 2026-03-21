@@ -16,7 +16,7 @@ const userLocationContainer = (neighborhoodName: string) => {
   const container = document.createElement('div')
   container.className = 'user-location-container'
 
-  const balloon = document.createElement('dov')
+  const balloon = document.createElement('div')
   balloon.className = 'user-location-balloon'
   balloon.textContent = `Você está em: ${neighborhoodName}`
 
