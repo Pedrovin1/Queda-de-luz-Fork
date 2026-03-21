@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { initMap } from './scripts/map.ts'
+import { fetchAllNeighborhoods } from './scripts/neighborhoodMap.ts'
+
+const city:string = 'Porto Alegre';
+const neighborhoods:string[] = ['Bela vista'];
 
 const openMenu = ref(true)
 const openChat = ref(true)
@@ -11,6 +15,30 @@ const activeTab = ref('chat')
 const loggedUser = ref(false)
 
 const messages = ref([{ user: 'Test', text: 'Mensagem de teste.' }])
+
+const portoAlegreNeighborhoods = ref<string[]>([])
+
+const detectLocation = ref('Detectar...')
+const putManualLocation = ref('')
+const isChangingReport = ref(false)
+const searchReportQuery = ref('')
+
+const displayNeighborhood = computed(() => detectLocation.value || putManualLocation.value)
+
+const filteredNeighborhoods = computed(() =>
+  portoAlegreNeighborhoods.value.filter((n) =>
+    n.toLowerCase().includes(searchReportQuery.value.toLocaleLowerCase()),
+  ),
+)
+
+const handleReport = () => {
+  console.log(`Enviado para a API o reporte: ${displayNeighborhood}`)
+}
+
+const selectManual = (name: string) => {
+  putManualLocation.value = name
+  isChangingReport.value = false
+}
 
 const toggleProfileChatView = () => {
   activeTab.value = activeTab.value === 'chat' ? 'profile' : 'chat'
@@ -32,7 +60,13 @@ const sendMessage = () => {
 }
 
 onMounted(async () => {
-  await initMap('map-canvas')
+  const names = await fetchAllNeighborhoods(city)
+  portoAlegreNeighborhoods.value = names
+  await initMap('map-canvas', city, neighborhoods)
+
+  window.addEventListener('neighborhood-detected', (e: any) => {
+    detectLocation.value = e.detail.name
+  })
 })
 </script>
 
@@ -47,6 +81,32 @@ onMounted(async () => {
   <div class="below-content">
     <button v-if="!openMenu" @click="openMenu = true" class="button-power-outage-outside">P</button>
     <button v-if="!openChat" @click="openChat = true" class="button-chat-outside"></button>
+    <div class="box-report-wrapper">
+      <div class="box-report-card">
+        <template v-if="!isChangingReport">
+          <p class="box-report-label">Reportar falta de luz:</p>
+          <h3 class="box-report-neighborhood">{{ displayNeighborhood }}</h3>
+          <button class="box-report-btn-main" @click="handleReport">SEM LUZ IRMÃO</button>
+          <button class="box-report-btn-change" @click="isChangingReport = true">
+            Mudar bairro
+          </button>
+        </template>
+        <template v-else>
+          <input
+            v-model="searchReportQuery"
+            type="text"
+            placeholder="Buscar bairro..."
+            class="box-report-input"
+          />
+          <ul class="box-report-dropdown">
+            <li v-for="n in filteredNeighborhoods" :key="n" @click="selectManual(n)">
+              {{ n }}
+            </li>
+          </ul>
+          <button class="box-report-btn-change" @click="isChangingReport = false">Cancelar</button>
+        </template>
+      </div>
+    </div>
     <div class="box-power-outage" :class="{ 'is-hidden': !openMenu }">
       <div class="box-power-outage-header">
         <h2 class="box-power-outrage-h2">Bairros sem luz</h2>

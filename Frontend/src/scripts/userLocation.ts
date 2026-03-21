@@ -1,24 +1,24 @@
-const fetchNeighborhoodLocation = async(lat: number, lng: number): Promise<string> => {
-    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`;
+const fetchNeighborhoodLocation = async (lat: number, lng: number): Promise<string> => {
+  const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`
 
-    try{
-        const response = await fetch(url);
-        const data = await response.json();
+  try {
+    const response = await fetch(url)
+    const data = await response.json()
 
-        return data.address.suburb || data.address.neighborhood;
-    }catch(e){
-        console.error("Erro ao pegar local de usuario para o marcador: ", e);
-        return "Local atual";
-    }
+    return data.address.suburb || data.address.neighborhood
+  } catch (e) {
+    console.error('Erro ao pegar local de usuario para o marcador: ', e)
+    return 'Local atual'
+  }
 }
 
 const userLocationContainer = (neighborhoodName: string) => {
   const container = document.createElement('div')
   container.className = 'user-location-container'
 
-  const balloon = document.createElement('dov');
-  balloon.className = 'user-location-balloon';
-  balloon.textContent = `Você está em: ${neighborhoodName}`;
+  const balloon = document.createElement('dov')
+  balloon.className = 'user-location-balloon'
+  balloon.textContent = `Você está em: ${neighborhoodName}`
 
   const dot = document.createElement('div')
   dot.className = 'user-location-dot'
@@ -42,7 +42,7 @@ export const addUserlocationMarker = async (
   )) as google.maps.MarkerLibrary
 
   if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition( 
+    navigator.geolocation.getCurrentPosition(
       async (position: GeolocationPosition) => {
         const userPos = {
           lat: position.coords.latitude,
@@ -50,16 +50,15 @@ export const addUserlocationMarker = async (
         }
 
         if (cityBounds.contains(userPos)) {
+          const neightborhoodName = await fetchNeighborhoodLocation(userPos.lat, userPos.lng)
 
-            const neightborhoodName = await fetchNeighborhoodLocation(userPos.lat, userPos.lng);
-
-            new AdvancedMarkerElement({
-                map: map,
-                position: userPos,
-                content: userLocationContainer(neightborhoodName),
-                title: 'Sua Localização',
-                zIndex: 30,
-            })
+          new AdvancedMarkerElement({
+            map: map,
+            position: userPos,
+            content: userLocationContainer(neightborhoodName),
+            title: 'Sua Localização',
+            zIndex: 30,
+          })
         } else {
           console.log('Usuario localizado fora dos limites da cidade.')
         }
