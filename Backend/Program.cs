@@ -29,6 +29,7 @@ const string connectionString= @"Data Source=" + DatabaseDirectory + DatabaseFil
 const string DBCreationSqlPath = DatabaseDirectory + "BlackoutMapDBCreate.sql";
 
 builder.Services.AddSingleton<IBlackoutMapConnectionFactory>(_ => new BlackoutMapConnectionFactory(connectionString));
+builder.Services.AddHostedService<AutoUpdateRecentReportsService>();
 
 if (!Directory.Exists(DatabaseDirectory) || !File.Exists(DatabaseDirectory + DatabaseFile))
 {

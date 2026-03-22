@@ -61,3 +61,4 @@ CREATE TABLE IF NOT EXISTS Recent_Report( --Aux table to index specific (recent)
 	Report_id INTEGER PRIMARY KEY NOT NULL,
 	FOREIGN KEY (Report_id) REFERENCES Report(Report_id)
 ); ---------------------------------------------------------------------------------------------
+
