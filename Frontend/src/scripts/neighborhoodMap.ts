@@ -12,6 +12,10 @@ export const fetchAllNeighborhoods = async (cityName: string): Promise<string[]>
 
   const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`
 
+  //OBS: Overpass é uma api muito instavel, porem é a unica opção para dar get em uma lista de bairros
+  //Nominatim apenas retorna a latitude e longitude, porem não seus nomes.
+
+
   try {
     const response = await fetch(url)
     const data = await response.json()

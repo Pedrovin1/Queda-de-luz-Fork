@@ -129,6 +129,13 @@ body,
         list-style: none;
         padding: 0;
         margin: 0;
+        &::-webkit-scrollbar {
+            width: 5px;
+          }
+          &::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+          }
         li {
           padding: 8px;
           font-size: 13px;
@@ -163,29 +170,6 @@ body,
 
     &:hover {
       background: rgba(204, 195, 195, 1);
-      box-shadow: 0 6px 20px rgba(94, 91, 91, 0.7);
-      transform: translateY(-2px);
-    }
-  }
-
-  .button-chat-outside {
-    position: absolute;
-    top: 82%;
-    right: 5px;
-    z-index: 3;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: rgba(204, 195, 195, 0.85);
-    cursor: pointer;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.3 ease;
-    box-shadow: 0 4px 15px $bg-color;
-    &:hover {
-      background-color: rgba(204, 195, 195, 1);
       box-shadow: 0 6px 20px rgba(94, 91, 91, 0.7);
       transform: translateY(-2px);
     }
@@ -295,7 +279,28 @@ body,
     z-index: 1;
     @include display-on-center;
   }
-
+  .button-chat-outside {
+    position: absolute;
+    top: 82%;
+    right: 5px;
+    z-index: 3;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(204, 195, 195, 0.85);
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3 ease;
+    box-shadow: 0 4px 15px $bg-color;
+    &:hover {
+      background-color: rgba(204, 195, 195, 1);
+      box-shadow: 0 6px 20px rgba(94, 91, 91, 0.7);
+      transform: translateY(-2px);
+    }
+  }
   .box-chat {
     color: white;
     background-color: rgba(15, 15, 15, 0.85);

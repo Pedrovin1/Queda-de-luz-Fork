@@ -60,7 +60,7 @@ const handleReport = async () => {
     neighborhoodsNoPower.value.push(reportedNeighborhood)
 
     if (initiateMap.value) {
-      await neighborhoodOutlines(initiateMap.value, [reportedNeighborhood], city)
+      await neighborhoodOutlines(initiateMap.value, [reportedNeighborhood], city, false)
     }
     console.log(`Reportado o bairro: ${reportedNeighborhood}`)
 
@@ -75,9 +75,13 @@ const selectManual = (name: string) => {
 
 
 onMounted(async () => {
-  const names = await fetchAllNeighborhoods(city)
+  const [names, map] = await Promise.all([
+    fetchAllNeighborhoods(city),
+    initMap('map-canvas', city, neighborhoodsNoPower.value)
+  ])
+
   neighborhoodsList.value = names
-  initiateMap.value = await initMap('map-canvas', city, neighborhoodsNoPower.value)
+  initiateMap.value = map
 
   window.addEventListener('neighborhood-detected', (e: any) => {
     detectLocation.value = e.detail.name
