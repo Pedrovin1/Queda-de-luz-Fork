@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
 import { initMap } from './scripts/map.ts'
-import { fetchAllNeighborhoods } from './scripts/neighborhoodMap.ts'
+import { fetchAllNeighborhoods, neighborhoodOutlines } from './scripts/neighborhoodMap.ts'
 
-const city:string = 'Porto Alegre';
-const neighborhoodsNoPower= ref<string[]>([])
+const city: string = 'Porto Alegre'
+const neighborhoodsNoPower = ref<string[]>(['Bela Vista'])
+
+const initiateMap = ref<google.maps.Map | undefined>(undefined)
 
 const openMenu = ref(true)
 const openChat = ref(true)
@@ -23,7 +25,9 @@ const putManualLocation = ref('')
 const isChangingReport = ref(false)
 const searchReportQuery = ref('')
 
-const displayNeighborhood = computed(() => detectLocation.value || putManualLocation.value || "Detectando...")
+const displayNeighborhood = computed(
+  () => detectLocation.value || putManualLocation.value || 'Detectando...',
+)
 
 const filteredNeighborhoods = computed(() =>
   neighborhoodsList.value.filter((n) =>
@@ -31,8 +35,22 @@ const filteredNeighborhoods = computed(() =>
   ),
 )
 
-const handleReport = () => {
-  console.log(`Enviado para a API o reporte: ${displayNeighborhood}`)
+const handleReport = async () => {
+  console.log(`Enviado para a API o reporte: ${displayNeighborhood.value}`)
+  const reportedNeighborhood = displayNeighborhood.value
+
+  if (!reportedNeighborhood || reportedNeighborhood === 'Detectando...') return
+
+  if (!neighborhoodsNoPower.value.includes(reportedNeighborhood)) {
+    neighborhoodsNoPower.value.push(reportedNeighborhood)
+
+    if (initiateMap.value) {
+      await neighborhoodOutlines(initiateMap.value, [reportedNeighborhood], city)
+    }
+    console.log(`Reportado o bairro: ${reportedNeighborhood}`)
+
+    putManualLocation.value = ''
+  }
 }
 
 const selectManual = (name: string) => {
@@ -62,7 +80,7 @@ const sendMessage = () => {
 onMounted(async () => {
   const names = await fetchAllNeighborhoods(city)
   neighborhoodsList.value = names
-  await initMap('map-canvas', city, neighborhoodsNoPower.value)
+  initiateMap.value = await initMap('map-canvas', city, neighborhoodsNoPower.value)
 
   window.addEventListener('neighborhood-detected', (e: any) => {
     detectLocation.value = e.detail.name
@@ -116,7 +134,7 @@ onMounted(async () => {
         <li v-if="neighborhoodsNoPower.length === 0" class="lista-items-bairros-sem-luz">
           <strong>Nenhum bairro reportado</strong>
         </li>
-        <li v-for="n in neighborhoodsNoPower":key="n" class="lista-items-bairros-sem-luz">
+        <li v-for="n in neighborhoodsNoPower" :key="n" class="lista-items-bairros-sem-luz">
           <strong>{{ n }}</strong>
         </li>
       </ul>

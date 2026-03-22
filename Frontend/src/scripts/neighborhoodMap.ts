@@ -1,4 +1,4 @@
-export const fetchAllNeighborhoods = async(cityName: string):Promise<string[]> => {
+export const fetchAllNeighborhoods = async (cityName: string): Promise<string[]> => {
   const query = `
     [out:json][timeout:25];
     area["name"="${cityName}"]["admin_level"="8"]->.searchArea;
@@ -6,30 +6,27 @@ export const fetchAllNeighborhoods = async(cityName: string):Promise<string[]> =
       node["place"~"suburb|neighbourhood"](area.searchArea);
     );
     out tags;
-  `;
+  `
 
   const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`
 
-  try{
-
-    const response = await fetch(url);
+  try {
+    const response = await fetch(url)
     const data = await response.json()
 
-    if(!data.elements) return [];
+    if (!data.elements) return []
 
     console.log(data.elements)
 
     const names = data.elements
       .map((el: any) => el.tags.name)
-      .filter((name: string | undefined): name is string => !!name);
+      .filter((name: string | undefined): name is string => !!name)
 
-    return Array.from<string>(new Set(names)).sort();
-
-  }catch(e){
-    console.error("Erro ao pegar bairros com Overpass: ", e);
-    return [];
+    return Array.from<string>(new Set(names)).sort()
+  } catch (e) {
+    console.error('Erro ao pegar bairros com Overpass: ', e)
+    return []
   }
-
 }
 
 const fetchNeighborhoodOutline = async (
@@ -68,6 +65,7 @@ export const neighborhoodOutlines = async (
   map: google.maps.Map,
   neighborhoodNames: string[],
   cityName: string,
+  fixedCamera: boolean = true,
 ): Promise<google.maps.Polygon[]> => {
   const polygonsMap: google.maps.Polygon[] = []
   const allBounds = new google.maps.LatLngBounds()
@@ -97,7 +95,7 @@ export const neighborhoodOutlines = async (
 
   await Promise.all(fetchPromises)
 
-  if (polygonsMap.length > 0) {
+  if (polygonsMap.length > 0 && fixedCamera) {
     map.fitBounds(allBounds)
     map.setZoom((map.getZoom() || 14) - 0.5)
   }

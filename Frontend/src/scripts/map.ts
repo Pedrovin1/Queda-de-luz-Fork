@@ -3,7 +3,7 @@ import { createCityMask, fetchCityBounds, fetchCityOutline } from './cityMap'
 import { neighborhoodOutlines } from './neighborhoodMap'
 import { addUserlocationMarker } from './userLocation'
 
-export async function initMap(elementId: string, city: string, neighborhoods:string[]) {
+export async function initMap(elementId: string, city: string, neighborhoods: string[]) {
   const { Map } = (await google.maps.importLibrary('maps')) as google.maps.MapsLibrary
 
   await google.maps.importLibrary('geometry')

@@ -45,11 +45,11 @@ export const addUserlocationMarker = async (
     navigator.geolocation.getCurrentPosition(
       async (position: GeolocationPosition) => {
         const userPos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude)
-        
+
         const cityPolygon = new google.maps.Polygon({ paths: cityBounds })
 
         if (google.maps.geometry.poly.containsLocation(userPos, cityPolygon)) {
-          const neightborhoodName = await fetchNeighborhoodLocation(userPos.lat(),userPos.lng())
+          const neightborhoodName = await fetchNeighborhoodLocation(userPos.lat(), userPos.lng())
 
           new AdvancedMarkerElement({
             map: map,
@@ -58,9 +58,11 @@ export const addUserlocationMarker = async (
             title: 'Sua Localização',
             zIndex: 30,
           })
-          window.dispatchEvent(new CustomEvent('neighborhood-detected', {
-            detail: { name: neightborhoodName}
-          }))
+          window.dispatchEvent(
+            new CustomEvent('neighborhood-detected', {
+              detail: { name: neightborhoodName },
+            }),
+          )
         } else {
           console.log('Usuario localizado fora dos limites da cidade.')
         }
