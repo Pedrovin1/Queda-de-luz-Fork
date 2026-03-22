@@ -35,7 +35,6 @@ const sendMessage = () => {
   }
 }
 
-
 //Variaveis para reporte
 const neighborhoodsList = ref<string[]>([])
 const detectLocation = ref('')
@@ -72,16 +71,40 @@ const selectManual = (name: string) => {
   isChangingReport.value = false
 }
 
-
-
 onMounted(async () => {
   const [names, map] = await Promise.all([
     fetchAllNeighborhoods(city),
-    initMap('map-canvas', city, neighborhoodsNoPower.value)
+    initMap('map-canvas', city, neighborhoodsNoPower.value),
   ])
 
   neighborhoodsList.value = names
   initiateMap.value = map
+
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+  const loadNeighborhoodList = async (attempts = 3) => {
+    let timer = 5000
+    for (let i = 0; i < attempts; i++) {
+      try {
+        const names = await fetchAllNeighborhoods(city)
+        if (names.length > 0) {
+          neighborhoodsList.value = names
+          return
+        }
+      } catch (e) {
+        console.warn(`Tentativa ${i + 1} falhou. Erro: `, e)
+      }
+      if (i < attempts - 1) {
+        console.warn(`Aguardando ${timer / 1000}s para a proxima tentativa.`)
+        await sleep(timer)
+        timer *= 2
+      }
+    }
+    console.error('Não foi possivel carregar a lista de bairros.')
+  }
+
+  if (neighborhoodsList.value.length === 0) {
+    loadNeighborhoodList()
+  }
 
   window.addEventListener('neighborhood-detected', (e: any) => {
     detectLocation.value = e.detail.name

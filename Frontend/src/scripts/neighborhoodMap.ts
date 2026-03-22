@@ -1,6 +1,8 @@
 //Funções de gerenciamento de parametros de bairros
 
 export const fetchAllNeighborhoods = async (cityName: string): Promise<string[]> => {
+  // const cacheNeighborhoods = localStorage.getItem(`${cityName}-neighborhoods`)
+  //if (cacheNeighborhoods) return JSON.parse(cacheNeighborhoods)
   const query = `
     [out:json][timeout:25];
     area["name"="${cityName}"]["admin_level"="8"]->.searchArea;
@@ -15,9 +17,12 @@ export const fetchAllNeighborhoods = async (cityName: string): Promise<string[]>
   //OBS: Overpass é uma api muito instavel, porem é a unica opção para dar get em uma lista de bairros
   //Nominatim apenas retorna a latitude e longitude, porem não seus nomes.
 
+  const controller = new AbortController()
+  const timeOut = setTimeout(() => controller.abort(), 25000)
 
   try {
     const response = await fetch(url)
+    clearTimeout(timeOut)
     const data = await response.json()
 
     if (!data.elements) return []
@@ -28,7 +33,11 @@ export const fetchAllNeighborhoods = async (cityName: string): Promise<string[]>
       .map((el: any) => el.tags.name)
       .filter((name: string | undefined): name is string => !!name)
 
-    return Array.from<string>(new Set(names)).sort()
+    const sendNeighborhoods = Array.from<string>(new Set(names)).sort()
+
+    localStorage.setItem(`${cityName}-neighborhoods`, JSON.stringify(sendNeighborhoods))
+
+    return sendNeighborhoods
   } catch (e) {
     console.error('Erro ao pegar bairros com Overpass: ', e)
     return []
