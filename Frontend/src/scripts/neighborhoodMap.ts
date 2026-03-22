@@ -1,8 +1,15 @@
 //Funções de gerenciamento de parametros de bairros
 
+let polygonsCleaner: google.maps.Polygon[] = [];
+
+const clearNeighborhoodPolygons = () => {
+  polygonsCleaner.forEach(p => p.setMap(null))
+  polygonsCleaner = []
+}
+
 export const fetchAllNeighborhoods = async (cityName: string): Promise<string[]> => {
-  // const cacheNeighborhoods = localStorage.getItem(`${cityName}-neighborhoods`)
-  //if (cacheNeighborhoods) return JSON.parse(cacheNeighborhoods)
+  const cacheNeighborhoods = localStorage.getItem(`${cityName}-neighborhoods`)
+  if (cacheNeighborhoods) return JSON.parse(cacheNeighborhoods)
   const query = `
     [out:json][timeout:25];
     area["name"="${cityName}"]["admin_level"="8"]->.searchArea;
@@ -82,6 +89,9 @@ export const neighborhoodOutlines = async (
   cityName: string,
   fixedCamera: boolean = true,
 ): Promise<google.maps.Polygon[]> => {
+
+  clearNeighborhoodPolygons();
+
   const polygonsMap: google.maps.Polygon[] = []
   const allBounds = new google.maps.LatLngBounds()
 
@@ -100,6 +110,7 @@ export const neighborhoodOutlines = async (
         map: map,
         zIndex: 15,
       })
+      polygonsCleaner.push(polygon)
       polygonsMap.push(polygon)
 
       paths.forEach((path) => {

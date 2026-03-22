@@ -59,12 +59,13 @@ const handleReport = async () => {
     neighborhoodsNoPower.value.push(reportedNeighborhood)
 
     if (initiateMap.value) {
-      await neighborhoodOutlines(initiateMap.value, [reportedNeighborhood], city, false)
+      await neighborhoodOutlines(initiateMap.value, neighborhoodsNoPower.value, city, false)
     }
     console.log(`Reportado o bairro: ${reportedNeighborhood}`)
 
     putManualLocation.value = ''
   }
+
 }
 const selectManual = (name: string) => {
   putManualLocation.value = name
