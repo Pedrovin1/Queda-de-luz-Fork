@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, onUnmounted } from 'vue'
 import { initMap } from './scripts/map.ts'
 import { fetchAllNeighborhoods, neighborhoodOutlines } from './scripts/neighborhoodMap.ts'
 
@@ -49,6 +49,7 @@ const filteredNeighborhoods = computed(() =>
     n.toLowerCase().includes(searchReportQuery.value.toLocaleLowerCase()),
   ),
 )
+const handleDetected = (e: any) => detectLocation.value = e.detail.name;
 const handleReport = async () => {
   console.log(`Enviado para a API o reporte: ${displayNeighborhood.value}`)
   const reportedNeighborhood = displayNeighborhood.value
@@ -107,15 +108,16 @@ onMounted(async () => {
     loadNeighborhoodList()
   }
 
-  window.addEventListener('neighborhood-detected', (e: any) => {
-    detectLocation.value = e.detail.name
-  })
+  window.addEventListener('neighborhood-detected', handleDetected)
   window.addEventListener('map-neighborhood-clicked', (e: any) => {
     putManualLocation.value = e.detail.name
 
     isChangingReport.value = false
     console.log(`Bairro clickado: ${e.detail.name}`)
   })
+})
+onUnmounted(() => {
+  window.removeEventListener('neighborhood-detected', handleDetected)
 })
 </script>
 
