@@ -1,3 +1,5 @@
+//Funções de gerenciamento de parametros da cidade
+
 const worldAmericaCoords: google.maps.LatLngLiteral[] = [
   { lat: 15, lng: -95 },
   { lat: 15, lng: -30 },

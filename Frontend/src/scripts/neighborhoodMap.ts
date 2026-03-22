@@ -1,3 +1,5 @@
+//Funções de gerenciamento de parametros de bairros
+
 export const fetchAllNeighborhoods = async (cityName: string): Promise<string[]> => {
   const query = `
     [out:json][timeout:25];

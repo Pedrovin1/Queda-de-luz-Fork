@@ -3,38 +3,53 @@ import { onMounted, ref, computed } from 'vue'
 import { initMap } from './scripts/map.ts'
 import { fetchAllNeighborhoods, neighborhoodOutlines } from './scripts/neighborhoodMap.ts'
 
+//Variaveis de teste
 const city: string = 'Porto Alegre'
 const neighborhoodsNoPower = ref<string[]>([])
 
+//Inicialização do mapa
 const initiateMap = ref<google.maps.Map | undefined>(undefined)
 
+//Variaveis do menu
 const openMenu = ref(true)
 const openChat = ref(true)
 const newMessage = ref('')
-
 const activeTab = ref('chat')
-
 const loggedUser = ref(false)
-
 const messages = ref([{ user: 'Test', text: 'Mensagem de teste.' }])
+const toggleProfileChatView = () => {
+  activeTab.value = activeTab.value === 'chat' ? 'profile' : 'chat'
+}
+const sendMessage = () => {
+  if (newMessage.value.trim()) {
+    messages.value.push({
+      user: 'Usuario',
+      text: newMessage.value,
+    })
+    newMessage.value = ''
 
+    setTimeout(() => {
+      const chatContainer = document.querySelector('.box-chat-messages')
+      if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight
+    }, 50)
+  }
+}
+
+
+//Variaveis para reporte
 const neighborhoodsList = ref<string[]>([])
-
 const detectLocation = ref('')
 const putManualLocation = ref('')
 const isChangingReport = ref(false)
 const searchReportQuery = ref('')
-
 const displayNeighborhood = computed(
   () => detectLocation.value || putManualLocation.value || 'Detectando...',
 )
-
 const filteredNeighborhoods = computed(() =>
   neighborhoodsList.value.filter((n) =>
     n.toLowerCase().includes(searchReportQuery.value.toLocaleLowerCase()),
   ),
 )
-
 const handleReport = async () => {
   console.log(`Enviado para a API o reporte: ${displayNeighborhood.value}`)
   const reportedNeighborhood = displayNeighborhood.value
@@ -52,30 +67,12 @@ const handleReport = async () => {
     putManualLocation.value = ''
   }
 }
-
 const selectManual = (name: string) => {
   putManualLocation.value = name
   isChangingReport.value = false
 }
 
-const toggleProfileChatView = () => {
-  activeTab.value = activeTab.value === 'chat' ? 'profile' : 'chat'
-}
 
-const sendMessage = () => {
-  if (newMessage.value.trim()) {
-    messages.value.push({
-      user: 'Usuario',
-      text: newMessage.value,
-    })
-    newMessage.value = ''
-
-    setTimeout(() => {
-      const chatContainer = document.querySelector('.box-chat-messages')
-      if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight
-    }, 50)
-  }
-}
 
 onMounted(async () => {
   const names = await fetchAllNeighborhoods(city)
