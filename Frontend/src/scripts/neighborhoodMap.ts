@@ -1,3 +1,37 @@
+export const fetchAllNeighborhoods = async(cityName: string):Promise<string[]> => {
+  const query = `
+    [out:json][timeout:25];
+    area["name"="${cityName}"]["admin_level"="8"]->.searchArea;
+    (
+      node["place"~"suburb|neighbourhood"](area.searchArea);
+    );
+    out tags;
+  `;
+
+  const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`
+
+  try{
+
+    const response = await fetch(url);
+    const data = await response.json()
+
+    if(!data.elements) return [];
+
+    console.log(data.elements)
+
+    const names = data.elements
+      .map((el: any) => el.tags.name)
+      .filter((name: string | undefined): name is string => !!name);
+
+    return Array.from<string>(new Set(names)).sort();
+
+  }catch(e){
+    console.error("Erro ao pegar bairros com Overpass: ", e);
+    return [];
+  }
+
+}
+
 const fetchNeighborhoodOutline = async (
   neighborhoodName: string,
 ): Promise<google.maps.LatLngLiteral[][]> => {
