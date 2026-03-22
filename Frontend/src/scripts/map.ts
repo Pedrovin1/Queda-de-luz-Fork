@@ -1,16 +1,14 @@
 /// <reference types="google.maps" />
 import { createCityMask, fetchCityBounds, fetchCityOutline } from './cityMap'
 import { neighborhoodOutlines } from './neighborhoodMap'
+import { addUserlocationMarker } from './userLocation'
 
-export async function initMap(elementId: string) {
+export async function initMap(elementId: string, city: string, neighborhoods:string[]) {
   const { Map } = (await google.maps.importLibrary('maps')) as google.maps.MapsLibrary
 
   await google.maps.importLibrary('geometry')
 
   const map = document.getElementById(elementId)
-
-  const city: string = 'Porto Alegre'
-  const neighborhood: string[] = []
 
   const [boundsCity, outlineCity] = await Promise.all([
     fetchCityBounds(city),
@@ -31,12 +29,14 @@ export async function initMap(elementId: string) {
       mapTypeControl: false,
       streetViewControl: false,
       fullscreenControl: false,
-      clickableIcons: false
+      clickableIcons: false,
     })
 
     createCityMask(mapOutput, outlineCity)
 
-    await neighborhoodOutlines(mapOutput, neighborhood, city)
+    await addUserlocationMarker(mapOutput, outlineCity)
+
+    await neighborhoodOutlines(mapOutput, neighborhoods, city)
 
     return mapOutput
   }

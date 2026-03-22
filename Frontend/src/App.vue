@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { initMap } from './scripts/map.ts'
+import { fetchAllNeighborhoods } from './scripts/neighborhoodMap.ts'
+
+const city:string = 'Porto Alegre';
+const neighborhoodsNoPower= ref<string[]>([])
 
 const openMenu = ref(true)
 const openChat = ref(true)
@@ -11,6 +15,30 @@ const activeTab = ref('chat')
 const loggedUser = ref(false)
 
 const messages = ref([{ user: 'Test', text: 'Mensagem de teste.' }])
+
+const neighborhoodsList = ref<string[]>([])
+
+const detectLocation = ref('')
+const putManualLocation = ref('')
+const isChangingReport = ref(false)
+const searchReportQuery = ref('')
+
+const displayNeighborhood = computed(() => detectLocation.value || putManualLocation.value || "Detectando...")
+
+const filteredNeighborhoods = computed(() =>
+  neighborhoodsList.value.filter((n) =>
+    n.toLowerCase().includes(searchReportQuery.value.toLocaleLowerCase()),
+  ),
+)
+
+const handleReport = () => {
+  console.log(`Enviado para a API o reporte: ${displayNeighborhood}`)
+}
+
+const selectManual = (name: string) => {
+  putManualLocation.value = name
+  isChangingReport.value = false
+}
 
 const toggleProfileChatView = () => {
   activeTab.value = activeTab.value === 'chat' ? 'profile' : 'chat'
@@ -32,7 +60,13 @@ const sendMessage = () => {
 }
 
 onMounted(async () => {
-  await initMap('map-canvas')
+  const names = await fetchAllNeighborhoods(city)
+  neighborhoodsList.value = names
+  await initMap('map-canvas', city, neighborhoodsNoPower.value)
+
+  window.addEventListener('neighborhood-detected', (e: any) => {
+    detectLocation.value = e.detail.name
+  })
 })
 </script>
 
@@ -47,17 +81,44 @@ onMounted(async () => {
   <div class="below-content">
     <button v-if="!openMenu" @click="openMenu = true" class="button-power-outage-outside">P</button>
     <button v-if="!openChat" @click="openChat = true" class="button-chat-outside"></button>
+    <div class="box-report-wrapper">
+      <div class="box-report-card">
+        <template v-if="!isChangingReport">
+          <p class="box-report-label">Reportar falta de luz:</p>
+          <h3 class="box-report-neighborhood">{{ displayNeighborhood }}</h3>
+          <button class="box-report-btn-main" @click="handleReport">SEM LUZ IRMÃO</button>
+          <button class="box-report-btn-change" @click="isChangingReport = true">
+            Mudar bairro
+          </button>
+        </template>
+        <template v-else>
+          <input
+            v-model="searchReportQuery"
+            type="text"
+            placeholder="Buscar bairro..."
+            class="box-report-input"
+          />
+          <ul class="box-report-dropdown">
+            <li v-for="n in filteredNeighborhoods" :key="n" @click="selectManual(n)">
+              {{ n }}
+            </li>
+          </ul>
+          <button class="box-report-btn-change" @click="isChangingReport = false">Cancelar</button>
+        </template>
+      </div>
+    </div>
     <div class="box-power-outage" :class="{ 'is-hidden': !openMenu }">
       <div class="box-power-outage-header">
         <h2 class="box-power-outrage-h2">Bairros sem luz</h2>
         <button class="button-power-outage-inside" @click="openMenu = false">X</button>
       </div>
       <ul class="lista-bairros-sem-luz">
-        <li class="lista-items-bairros-sem-luz"><strong>Bairro sem luz 1</strong></li>
-        <li class="lista-items-bairros-sem-luz"><strong>Bairro sem luz 2</strong></li>
-        <li class="lista-items-bairros-sem-luz"><strong>Bairro sem luz 3</strong></li>
-        <li class="lista-items-bairros-sem-luz"><strong>Bairro sem luz 4</strong></li>
-        <li class="lista-items-bairros-sem-luz"><strong>Bairro sem luz 5</strong></li>
+        <li v-if="neighborhoodsNoPower.length === 0" class="lista-items-bairros-sem-luz">
+          <strong>Nenhum bairro reportado</strong>
+        </li>
+        <li v-for="n in neighborhoodsNoPower":key="n" class="lista-items-bairros-sem-luz">
+          <strong>{{ n }}</strong>
+        </li>
       </ul>
     </div>
     <div class="box-map" id="map-canvas"><h1>Map</h1></div>

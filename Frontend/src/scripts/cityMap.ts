@@ -1,10 +1,3 @@
-export interface CityBounds {
-  north: number
-  south: number
-  east: number
-  west: number
-}
-
 const worldAmericaCoords: google.maps.LatLngLiteral[] = [
   { lat: 15, lng: -95 },
   { lat: 15, lng: -30 },
@@ -13,7 +6,7 @@ const worldAmericaCoords: google.maps.LatLngLiteral[] = [
   { lat: 15, lng: -95 },
 ]
 
-export const fetchCityBounds = async (cityName: string): Promise<CityBounds> => {
+export const fetchCityBounds = async (cityName: string): Promise<google.maps.LatLngBounds> => {
   const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityName)}&format=json&limit=1`
 
   try {
@@ -24,21 +17,14 @@ export const fetchCityBounds = async (cityName: string): Promise<CityBounds> => 
 
     const [south, north, west, east] = data[0].boundingbox.map(Number)
 
-    return {
-      north,
-      south,
-      east,
-      west,
-    }
+    return new google.maps.LatLngBounds({ lat: south, lng: west }, { lat: north, lng: east })
   } catch (e) {
     console.error('Erro ao puxar dados da cidade: ', e)
 
-    return {
-      north: -29.930786,
-      south: -30.269359,
-      east: -51.01142,
-      west: -51.299773,
-    }
+    return new google.maps.LatLngBounds(
+      { lat: -30.269359, lng: -51.299773 },
+      { lat: -29.930786, lng: -51.01142 },
+    )
   }
 }
 
