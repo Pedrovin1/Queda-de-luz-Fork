@@ -8,6 +8,9 @@ const clearNeighborhoodPolygons = () => {
 }
 
 export const fetchAllNeighborhoods = async (cityName: string): Promise<string[]> => {
+
+  if(!cityName) return [];
+
   const cacheNeighborhoods = `${cityName}-neighborhoods`
 
   try{

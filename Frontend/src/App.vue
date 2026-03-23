@@ -4,7 +4,7 @@ import { initMap } from './scripts/map.ts'
 import { fetchAllNeighborhoods, neighborhoodOutlines } from './scripts/neighborhoodMap.ts'
 
 //Variaveis de teste
-const city = ref<string>('Porto Alegre')
+const city = ref<string>('')
 const neighborhoodsNoPower = ref<string[]>([])
 
 //Inicialização do mapa
@@ -123,11 +123,18 @@ onMounted(async () => {
       city.value = newCity
       neighborhoodsList.value = await fetchAllNeighborhoods(newCity)
 
+      const mapDiv = document.getElementById('map-canvas');
+      if(mapDiv) mapDiv.innerHTML = '';
+
       initiateMap.value = await initMap('map-canvas', newCity, neighborhoodsNoPower.value)
-    }else if(strictCity && newCity !== city.value){
-      console.warn(`Modo Estrito: Ignorada mudança para ${newCity}. Mantendo em ${city.value}`)
+    }else if(strictCity){
+      if(newCity === city.value){
+        detectLocation.value = newNeighborhood
+      }else{
+        console.warn(`Modo Estrito: Ignorada mudança para ${newCity}. Mantendo em ${city.value}`)
+        detectLocation.value = 'Fora de area.';
+      }
     }
-    detectLocation.value = newNeighborhood;
   })
   window.addEventListener('neighborhood-detected', handleDetected)
   window.addEventListener('map-neighborhood-clicked', (e: any) => {
