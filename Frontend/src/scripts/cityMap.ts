@@ -11,16 +11,16 @@ const worldAmericaCoords: google.maps.LatLngLiteral[] = [
 export const fetchCityBounds = async (cityName: string): Promise<google.maps.LatLngBounds> => {
   const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityName)}&format=json&limit=1`
 
-  const cacheCityBounds = `cityName-${cityName}`;
-  try{
+  const cacheCityBounds = `cityName-${cityName}`
+  try {
     const cached = localStorage.getItem(cacheCityBounds)
 
-    if(cached) {
-    const { south, west, north, east } = JSON.parse(cached)
-    return new google.maps.LatLngBounds({ lat: south, lng: west}, { lat: north, lng: east })
-  }
-  }catch(e){
-    console.warn("Falha ao ler cache da cidade")
+    if (cached) {
+      const { south, west, north, east } = JSON.parse(cached)
+      return new google.maps.LatLngBounds({ lat: south, lng: west }, { lat: north, lng: east })
+    }
+  } catch (e) {
+    console.warn('Falha ao ler cache da cidade')
   }
 
   try {
@@ -31,7 +31,7 @@ export const fetchCityBounds = async (cityName: string): Promise<google.maps.Lat
 
     const [south, north, west, east] = data[0].boundingbox.map(Number)
 
-    localStorage.setItem(cacheCityBounds, JSON.stringify({south,west,north,east}))
+    localStorage.setItem(cacheCityBounds, JSON.stringify({ south, west, north, east }))
 
     return new google.maps.LatLngBounds({ lat: south, lng: west }, { lat: north, lng: east })
   } catch (e) {
@@ -49,10 +49,10 @@ export const fetchCityOutline = async (
 ): Promise<google.maps.LatLngLiteral[][]> => {
   const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityName)}&format=json&polygon_geojson=1&limit=1`
 
-  const cacheCityOutline = `city-outline-${cityName}`;
-  const cached = localStorage.getItem(cacheCityOutline);
+  const cacheCityOutline = `city-outline-${cityName}`
+  const cached = localStorage.getItem(cacheCityOutline)
 
-  if(cached) return JSON.parse(cached)
+  if (cached) return JSON.parse(cached)
 
   try {
     const response = await fetch(url)
@@ -74,7 +74,7 @@ export const fetchCityOutline = async (
         })
       })
     }
-    localStorage.setItem(cacheCityOutline, JSON.stringify(paths));
+    localStorage.setItem(cacheCityOutline, JSON.stringify(paths))
     return paths
   } catch (e) {
     console.error('Erro ao contornar cidade: ', e)

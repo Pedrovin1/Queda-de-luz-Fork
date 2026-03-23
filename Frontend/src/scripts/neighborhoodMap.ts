@@ -1,23 +1,22 @@
 //Funções de gerenciamento de parametros de bairros
 
-let polygonsCleaner: google.maps.Polygon[] = [];
+let polygonsCleaner: google.maps.Polygon[] = []
 
 const clearNeighborhoodPolygons = () => {
-  polygonsCleaner.forEach(p => p.setMap(null))
+  polygonsCleaner.forEach((p) => p.setMap(null))
   polygonsCleaner = []
 }
 
 export const fetchAllNeighborhoods = async (cityName: string): Promise<string[]> => {
-
-  if(!cityName) return [];
+  if (!cityName) return []
 
   const cacheNeighborhoods = `${cityName}-neighborhoods`
 
-  try{
+  try {
     const cached = localStorage.getItem(cacheNeighborhoods)
     if (cached) return JSON.parse(cached)
-  }catch(e){
-    console.warn("Erro ao ler cache da lista de bairros.")
+  } catch (e) {
+    console.warn('Erro ao ler cache da lista de bairros.')
   }
 
   const query = `
@@ -64,6 +63,16 @@ export const fetchAllNeighborhoods = async (cityName: string): Promise<string[]>
 const fetchNeighborhoodOutline = async (
   neighborhoodName: string,
 ): Promise<google.maps.LatLngLiteral[][]> => {
+  
+  const cacheOutlines = `outline-${neighborhoodName}`
+  try{
+    const cached = localStorage.getItem(cacheOutlines)
+    if(cached) return JSON.parse(cached)
+  }catch(e){
+    console.warn("Erro ao pegar cache das bordas de bairro")
+  }
+  
+  
   const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(neighborhoodName)}&format=json&polygon_geojson=1&limit=1`
 
   try {
@@ -86,6 +95,7 @@ const fetchNeighborhoodOutline = async (
         })
       })
     }
+    localStorage.setItem(cacheOutlines, JSON.stringify(paths))
     return paths
   } catch (e) {
     console.error('Erro ao contornar cidade: ', e)
@@ -100,15 +110,19 @@ export const neighborhoodOutlines = async (
   fixedCamera: boolean = true,
 ): Promise<google.maps.Polygon[]> => {
 
-  clearNeighborhoodPolygons();
-
   const polygonsMap: google.maps.Polygon[] = []
   const allBounds = new google.maps.LatLngBounds()
 
   const fetchPromises = neighborhoodNames.map(async (name) => {
-    const fullSearchName = `${name}, ${cityName}`
-    const paths = await fetchNeighborhoodOutline(fullSearchName)
+    const fullSearchName = `${name}, ${cityName}`;
+    return { name, paths: await fetchNeighborhoodOutline(fullSearchName)}
+  })
+  
+  const result = await Promise.all(fetchPromises)
 
+  clearNeighborhoodPolygons()
+
+  result.forEach(({paths}) => {
     if (paths.length > 0) {
       const polygon = new google.maps.Polygon({
         paths: paths,
@@ -129,11 +143,8 @@ export const neighborhoodOutlines = async (
     }
   })
 
-  await Promise.all(fetchPromises)
-
   if (polygonsMap.length > 0 && fixedCamera) {
     map.fitBounds(allBounds)
-    map.setZoom((map.getZoom() || 14) - 0.5)
   }
   return polygonsMap
 }

@@ -4,7 +4,7 @@ import { initMap } from './scripts/map.ts'
 import { fetchAllNeighborhoods, neighborhoodOutlines } from './scripts/neighborhoodMap.ts'
 
 //Variaveis de teste
-const city = ref<string>('')
+const city = ref<string>('Porto Alegre')
 const neighborhoodsNoPower = ref<string[]>([])
 
 //Inicialização do mapa
@@ -49,7 +49,7 @@ const filteredNeighborhoods = computed(() =>
     n.toLowerCase().includes(searchReportQuery.value.toLocaleLowerCase()),
   ),
 )
-const handleDetected = (e: any) => detectLocation.value = e.detail.name;
+const handleDetected = (e: any) => (detectLocation.value = e.detail.name)
 const handleReport = async () => {
   console.log(`Enviado para a API o reporte: ${displayNeighborhood.value}`)
   const reportedNeighborhood = displayNeighborhood.value
@@ -66,7 +66,6 @@ const handleReport = async () => {
 
     putManualLocation.value = ''
   }
-
 }
 const selectManual = (name: string) => {
   putManualLocation.value = name
@@ -74,6 +73,41 @@ const selectManual = (name: string) => {
 }
 
 onMounted(async () => {
+  window.addEventListener('neighborhood-detected', handleDetected)
+  window.addEventListener('map-neighborhood-clicked', (e: any) => {
+    putManualLocation.value = e.detail.name
+
+    isChangingReport.value = false
+    console.log(`Bairro clickado: ${e.detail.name}`)
+  })
+  window.addEventListener('location-detected', async (e: any) => {
+    const { neighborhood: newNeighborhood, city: newCity } = e.detail
+
+    const strictCity = city.value !== ''
+
+    if (!strictCity && newCity && newCity !== city.value) {
+      console.warn(`Mudança de cidade realizada: ${city.value} -> ${newCity}`)
+
+      localStorage.removeItem(`city-bounds-${city.value}`)
+      localStorage.removeItem(`city-outline-${city.value}`)
+      localStorage.removeItem(`${city.value}-neighborhoods`)
+
+      city.value = newCity
+      neighborhoodsList.value = await fetchAllNeighborhoods(newCity)
+
+      const mapDiv = document.getElementById('map-canvas')
+      if (mapDiv) mapDiv.innerHTML = ''
+
+      initiateMap.value = await initMap('map-canvas', newCity, neighborhoodsNoPower.value)
+    } else if (strictCity) {
+      if (newCity === city.value) {
+        detectLocation.value = newNeighborhood
+      } else {
+        console.warn(`Modo Estrito: Ignorada mudança para ${newCity}. Mantendo em ${city.value}`)
+        detectLocation.value = 'Fora de area.'
+      }
+    }
+  })
   const [names, map] = await Promise.all([
     fetchAllNeighborhoods(city.value),
     initMap('map-canvas', city.value, neighborhoodsNoPower.value),
@@ -107,42 +141,6 @@ onMounted(async () => {
   if (neighborhoodsList.value.length === 0) {
     loadNeighborhoodList()
   }
-
-  window.addEventListener('location-detected', async(e: any) =>  {
-    const { neighborhood: newNeighborhood, city: newCity } = e.detail
-
-    const strictCity = city.value !== '';
-
-    if(!strictCity && newCity && newCity !== city.value) {
-      console.warn(`Mudança de cidade realizada: ${city.value} -> ${newCity}`)
-
-      localStorage.removeItem(`city-bounds-${city.value}`);
-      localStorage.removeItem(`city-outline-${city.value}`);
-      localStorage.removeItem(`${city.value}-neighborhoods`);
-
-      city.value = newCity
-      neighborhoodsList.value = await fetchAllNeighborhoods(newCity)
-
-      const mapDiv = document.getElementById('map-canvas');
-      if(mapDiv) mapDiv.innerHTML = '';
-
-      initiateMap.value = await initMap('map-canvas', newCity, neighborhoodsNoPower.value)
-    }else if(strictCity){
-      if(newCity === city.value){
-        detectLocation.value = newNeighborhood
-      }else{
-        console.warn(`Modo Estrito: Ignorada mudança para ${newCity}. Mantendo em ${city.value}`)
-        detectLocation.value = 'Fora de area.';
-      }
-    }
-  })
-  window.addEventListener('neighborhood-detected', handleDetected)
-  window.addEventListener('map-neighborhood-clicked', (e: any) => {
-    putManualLocation.value = e.detail.name
-
-    isChangingReport.value = false
-    console.log(`Bairro clickado: ${e.detail.name}`)
-  })
 })
 onUnmounted(() => {
   window.removeEventListener('neighborhood-detected', handleDetected)
