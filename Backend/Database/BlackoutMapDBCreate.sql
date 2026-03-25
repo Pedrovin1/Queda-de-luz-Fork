@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS Base_Account (
                 Description TEXT CHECK(length(Description) <= 500),
                 Profile_picture_link TEXT,
                 UTC_datetime_creation INTEGER DEFAULT( unixepoch('now') ) NOT NULL, --UTC (in seconds)
-                advertisement_slots_amount INTEGER DEFAULT 0 NOT NULL,
+                Advertisement_slots_amount INTEGER DEFAULT 0 NOT NULL,
                 District_id INTEGER NOT NULL,
                 FOREIGN KEY(District_id) REFERENCES District(District_id)
 ) ; ---------------------------------------------------------------------------------------------
@@ -38,6 +38,12 @@ CREATE TABLE IF NOT EXISTS Person_Account (
                 Informal_Work TEXT CHECK( length(Informal_Work) <= 50 ),
                 FOREIGN KEY (Person_Account_id) REFERENCES Base_Account(Base_Account_id)
 ) ; ---------------------------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS Business_Account(
+	Business_Account_id INTEGER PRIMARY KEY NOT NULL,
+	Cnpj TEXT NOT NULL,
+	FOREIGN KEY (Business_Account_id) REFERENCES Base_Account(Base_Account_id)
+); ---------------------------------------------------------------------------------------------
 
 
 CREATE TABLE IF NOT EXISTS Report (
