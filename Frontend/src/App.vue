@@ -72,73 +72,85 @@ const selectManual = (name: string) => {
   isChangingReport.value = false
 }
 
+const handleLocationDetected = async (e:any) => {
+  const { neighborhood: newNeighborhood, city: newCity } = e.detail
+
+  const strictCity = city.value !== ''
+
+  if (!strictCity && newCity && newCity !== city.value) {
+    console.warn(`Mudança de cidade realizada: ${city.value} -> ${newCity}`)
+
+    clearAllPolygons()
+
+    localStorage.removeItem(`city-bounds-${city.value}`)
+    localStorage.removeItem(`city-outline-${city.value}`)
+    localStorage.removeItem(`${city.value}-neighborhoods`)
+
+    city.value = newCity
+    neighborhoodsList.value = await fetchAllNeighborhoods(newCity)
+
+    const mapDiv = document.getElementById('map-canvas')
+    if (mapDiv) mapDiv.innerHTML = ''
+
+    initiateMap.value = await initMap('map-canvas', newCity, neighborhoodsNoPower.value)
+
+    detectLocation.value = newNeighborhood
+  } else if (strictCity) {
+    if (newCity === city.value) {
+      detectLocation.value = newNeighborhood
+    } else {
+      console.warn(`Modo Estrito: Ignorada mudança para ${newCity}. Mantendo em ${city.value}`)
+      detectLocation.value = 'Fora de area.'
+    }
+  }
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+const loadNeighborhoodList = async (attempts = 3) => {
+  let timer = 5000
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const names = await fetchAllNeighborhoods(city.value)
+      if (names.length > 0) {
+        neighborhoodsList.value = names
+        return
+      }
+    } catch (e) {
+      console.warn(`Tentativa ${i + 1} falhou. Erro: `, e)
+    }
+    if (i < attempts - 1) {
+      console.warn(`Aguardando ${timer / 1000}s para a proxima tentativa.`)
+      await sleep(timer)
+      timer *= 2
+    }
+  }
+  console.error('Não foi possivel carregar a lista de bairros.')
+}
+
 onMounted(async () => {
   window.addEventListener('neighborhood-detected', handleDetected)
   window.addEventListener('map-neighborhood-clicked', (e: any) => {
     putManualLocation.value = e.detail.name
-
     isChangingReport.value = false
     console.log(`Bairro clickado: ${e.detail.name}`)
   })
-  window.addEventListener('location-detected', async (e: any) => {
-    const { neighborhood: newNeighborhood, city: newCity } = e.detail
+  window.addEventListener('location-detected', handleLocationDetected)
 
-    const strictCity = city.value !== ''
+  //Carregamento da pagina é realizado sequencialmente
+  //Evitar bug de chamadas de componentes não dependentes
 
-    if (!strictCity && newCity && newCity !== city.value) {
-      console.warn(`Mudança de cidade realizada: ${city.value} -> ${newCity}`)
+  try{
+    const names = await fetchAllNeighborhoods(city.value);
+    
+    neighborhoodsList.value = names;
 
-      localStorage.removeItem(`city-bounds-${city.value}`)
-      localStorage.removeItem(`city-outline-${city.value}`)
-      localStorage.removeItem(`${city.value}-neighborhoods`)
+    initiateMap.value = await initMap('map-canvas', city.value, neighborhoodsNoPower.value)
 
-      city.value = newCity
-      neighborhoodsList.value = await fetchAllNeighborhoods(newCity)
+    console.log(`Mapa de ${city.value} foi carregado com ${names.length} bairros.`)
 
-      const mapDiv = document.getElementById('map-canvas')
-      if (mapDiv) mapDiv.innerHTML = ''
-
-      initiateMap.value = await initMap('map-canvas', newCity, neighborhoodsNoPower.value)
-    } else if (strictCity) {
-      if (newCity === city.value) {
-        detectLocation.value = newNeighborhood
-      } else {
-        console.warn(`Modo Estrito: Ignorada mudança para ${newCity}. Mantendo em ${city.value}`)
-        detectLocation.value = 'Fora de area.'
-      }
-    }
-    if(initiateMap.value) {
-      clearAllPolygons()
-    }
-  })
-  const [names, map] = await Promise.all([
-    fetchAllNeighborhoods(city.value),
-    initMap('map-canvas', city.value, neighborhoodsNoPower.value),
-  ])
-
-  neighborhoodsList.value = names
-  initiateMap.value = map
-
-  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-  const loadNeighborhoodList = async (attempts = 3) => {
-    let timer = 5000
-    for (let i = 0; i < attempts; i++) {
-      try {
-        const names = await fetchAllNeighborhoods(city.value)
-        if (names.length > 0) {
-          neighborhoodsList.value = names
-          return
-        }
-      } catch (e) {
-        console.warn(`Tentativa ${i + 1} falhou. Erro: `, e)
-      }
-      if (i < attempts - 1) {
-        console.warn(`Aguardando ${timer / 1000}s para a proxima tentativa.`)
-        await sleep(timer)
-        timer *= 2
-      }
-    }
-    console.error('Não foi possivel carregar a lista de bairros.')
+  }catch(error){
+    console.warn("Erro ao realizar carregamento da pagina: ", error)
   }
 
   if (neighborhoodsList.value.length === 0) {
@@ -147,6 +159,8 @@ onMounted(async () => {
 })
 onUnmounted(() => {
   window.removeEventListener('neighborhood-detected', handleDetected)
+  window.removeEventListener('location-detected', handleLocationDetected)
+  window.removeEventListener('map-neighborhood-clicked', ()=> {})
 })
 </script>
 
