@@ -48,9 +48,9 @@ public class HomePageService : IHomePageService
         //Create a report in the database
         Report result = await dbContext.QuerySingleAsync<Report>(
             """
-            INSERT INTO Report (Is_Fixed, Problem_Category_id, Reported_District_id, Base_Account_id) 
-            VALUES (@IsFixed, @ProblemCategory_Id, @District_Id, @AccountId) 
-            RETURNING *;
+                INSERT INTO Report (Is_Fixed, Problem_Category_id, Reported_District_id, Base_Account_id) 
+                VALUES (@IsFixed, @ProblemCategory_Id, @District_Id, @AccountId) 
+                RETURNING *;
             """,
             new{ IsFixed = report.IsFixed,
                  ProblemCategory_Id = report.ProblemCategoryId, 
@@ -61,10 +61,18 @@ public class HomePageService : IHomePageService
         //"add" the recently created report to the recent reports table
         await dbContext.ExecuteAsync(
             """
-            INSERT INTO Recent_Report (Report_id) VALUES (@reportId);
+                INSERT INTO Recent_Report (Report_id) VALUES (@reportId);
             """,
             new{ reportId = result.Id }
         );
+
+
+        if(report.IsFixed == true)
+        {
+            await dbContext.ExecuteAsync(
+                AutoUpdateRecentReportsService.SQL_DeleteRecentReportsWithIsFixedRatio
+            );
+        }
 
         await dbContext.CloseAsync();
 
@@ -80,17 +88,17 @@ public class HomePageService : IHomePageService
 
         _ = await dbContext.QueryAsync<string, District, ProblemCategory, long, bool>(
             """
-            SELECT c.City_Name, 
-                dis.District_id, dis.District_Name, 
-                pc.Problem_Category_id, pc.Problem_Category_Name, 
-                COUNT(rep.Problem_Category_id) AS Reports_Amount
-            FROM Recent_Report AS recrep
-                JOIN Report           AS rep ON recrep.Report_id = rep.Report_id
-                JOIN District         AS dis ON rep.Reported_District_id = dis.District_id
-                JOIN City             AS c   ON dis.City_id = c.City_id
-                JOIN Problem_Category AS pc  ON rep.Problem_Category_id = pc.Problem_Category_id
-            WHERE rep.Is_Fixed = FALSE AND c.City_id = @CityId --queried City_id
-            GROUP BY dis.District_id, pc.Problem_Category_id;
+                SELECT c.City_Name, 
+                    dis.District_id, dis.District_Name, 
+                    pc.Problem_Category_id, pc.Problem_Category_Name, 
+                    COUNT(rep.Problem_Category_id) AS Reports_Amount
+                FROM Recent_Report AS recrep
+                    JOIN Report           AS rep ON recrep.Report_id = rep.Report_id
+                    JOIN District         AS dis ON rep.Reported_District_id = dis.District_id
+                    JOIN City             AS c   ON dis.City_id = c.City_id
+                    JOIN Problem_Category AS pc  ON rep.Problem_Category_id = pc.Problem_Category_id
+                WHERE rep.Is_Fixed = FALSE AND c.City_id = @CityId --queried City_id
+                GROUP BY dis.District_id, pc.Problem_Category_id;
             """,
 
             (cityName, district, problemCategory, problemAmount) => 
@@ -122,9 +130,9 @@ public class HomePageService : IHomePageService
 
         var result = await dbContext.QueryAsync<City>(
             $"""
-            SELECT City_id, City_Name 
-            FROM City 
-            WHERE State_Abbreviation = '{state_abbreviation}'; 
+                SELECT City_id, City_Name 
+                FROM City 
+                WHERE State_Abbreviation = '{state_abbreviation}'; 
             """
             //,
             //new{ stateAbbreviation = state_abbreviation}
