@@ -1,5 +1,6 @@
 //Funções de gerenciamento de parametros da cidade
 
+import { cacheManager } from "./cacheManager"
 import { safeFetch } from "./clientApi"
 
 const worldAmericaCoords: google.maps.LatLngLiteral[] = [
@@ -11,19 +12,21 @@ const worldAmericaCoords: google.maps.LatLngLiteral[] = [
 ]
 
 export const fetchCityBounds = async (cityName: string): Promise<google.maps.LatLngBounds> => {
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityName)}&format=json&limit=1`
 
-  const cacheCityBounds = `cityName-${cityName}`
+  const cacheCityBounds = `city-bounds-${cityName}`
   try {
-    const cached = localStorage.getItem(cacheCityBounds)
 
+    const cached = cacheManager.get<{south: number, west: number, north: number, east: number}>(cacheCityBounds)
     if (cached) {
-      const { south, west, north, east } = JSON.parse(cached)
+      const { south, west, north, east } = cached
       return new google.maps.LatLngBounds({ lat: south, lng: west }, { lat: north, lng: east })
     }
   } catch (e) {
     console.warn('Falha ao ler cache da cidade')
   }
+
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityName)}&format=json&limit=1`
+
 
   try {
     const response = await safeFetch(url)
@@ -33,7 +36,7 @@ export const fetchCityBounds = async (cityName: string): Promise<google.maps.Lat
 
     const [south, north, west, east] = data[0].boundingbox.map(Number)
 
-    localStorage.setItem(cacheCityBounds, JSON.stringify({ south, west, north, east }))
+    cacheManager.set(cacheCityBounds,{ south, west, north, east }, 7)
 
     return new google.maps.LatLngBounds({ lat: south, lng: west }, { lat: north, lng: east })
   } catch (e) {
@@ -49,12 +52,16 @@ export const fetchCityBounds = async (cityName: string): Promise<google.maps.Lat
 export const fetchCityOutline = async (
   cityName: string,
 ): Promise<google.maps.LatLngLiteral[][]> => {
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityName)}&format=json&polygon_geojson=1&limit=1`
 
   const cacheCityOutline = `city-outline-${cityName}`
-  const cached = localStorage.getItem(cacheCityOutline)
+  try{
+    const cached = cacheManager.get<google.maps.LatLngLiteral[][]>(cacheCityOutline)
+    if (cached) return cached
+  }catch(e){
+    console.warn('Falha ao ler cache da cidade')
+  }
 
-  if (cached) return JSON.parse(cached)
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityName)}&format=json&polygon_geojson=1&limit=1`
 
   try {
     const response = await safeFetch(url)
@@ -76,7 +83,7 @@ export const fetchCityOutline = async (
         })
       })
     }
-    localStorage.setItem(cacheCityOutline, JSON.stringify(paths))
+    cacheManager.set(cacheCityOutline, paths, 7)
     return paths
   } catch (e) {
     console.error('Erro ao contornar cidade: ', e)

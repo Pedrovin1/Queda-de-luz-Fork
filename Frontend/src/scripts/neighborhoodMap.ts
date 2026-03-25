@@ -1,5 +1,6 @@
 //Funções de gerenciamento de parametros de bairros
 
+import { cacheManager } from "./cacheManager"
 import { safeFetch } from "./clientApi"
 
 let polygonsCleaner: google.maps.Polygon[] = []
@@ -15,8 +16,8 @@ export const fetchAllNeighborhoods = async (cityName: string): Promise<string[]>
   const cacheNeighborhoods = `${cityName}-neighborhoods`
 
   try {
-    const cached = localStorage.getItem(cacheNeighborhoods)
-    if (cached) return JSON.parse(cached)
+    const cached = cacheManager.get<string[]>(cacheNeighborhoods)
+    if (cached) return cached
   } catch (e) {
     console.warn('Erro ao ler cache da lista de bairros.')
   }
@@ -35,12 +36,8 @@ export const fetchAllNeighborhoods = async (cityName: string): Promise<string[]>
   //OBS: Overpass é uma api muito instavel, porem é a unica opção para dar get em uma lista de bairros
   //Nominatim apenas retorna a latitude e longitude, porem não seus nomes.
 
-  const controller = new AbortController()
-  const timeOut = setTimeout(() => controller.abort(), 25000)
-
   try {
     const response = await safeFetch(url)
-    clearTimeout(timeOut)
     const data = await response.json()
 
     if (!data.elements) return []
@@ -53,7 +50,7 @@ export const fetchAllNeighborhoods = async (cityName: string): Promise<string[]>
 
     const sendNeighborhoods = Array.from<string>(new Set(names)).sort()
 
-    localStorage.setItem(`${cityName}-neighborhoods`, JSON.stringify(sendNeighborhoods))
+    cacheManager.set(cacheNeighborhoods, sendNeighborhoods, 7);
 
     return sendNeighborhoods
   } catch (e) {
@@ -67,8 +64,8 @@ const fetchNeighborhoodOutline = async (
 ): Promise<google.maps.LatLngLiteral[][]> => {
   const cacheOutlines = `outline-${neighborhoodName}`
   try {
-    const cached = localStorage.getItem(cacheOutlines)
-    if (cached) return JSON.parse(cached)
+    const cached = cacheManager.get<google.maps.LatLngLiteral[][]>(cacheOutlines)
+    if (cached) return cached
   } catch (e) {
     console.warn('Erro ao pegar cache das bordas de bairro')
   }
@@ -95,7 +92,7 @@ const fetchNeighborhoodOutline = async (
         })
       })
     }
-    localStorage.setItem(cacheOutlines, JSON.stringify(paths))
+    cacheManager.set(cacheOutlines, paths, 7)
     return paths
   } catch (e) {
     console.error('Erro ao contornar cidade: ', e)
