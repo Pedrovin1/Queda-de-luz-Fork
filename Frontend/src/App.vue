@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, computed, onUnmounted } from 'vue'
 import { initMap } from './scripts/map.ts'
-import { fetchAllNeighborhoods, neighborhoodOutlines } from './scripts/neighborhoodMap.ts'
+import { clearAllPolygons, fetchAllNeighborhoods, neighborhoodOutlines } from './scripts/neighborhoodMap.ts'
 
 //Variaveis de teste
 const city = ref<string>('Porto Alegre')
@@ -106,6 +106,9 @@ onMounted(async () => {
         console.warn(`Modo Estrito: Ignorada mudança para ${newCity}. Mantendo em ${city.value}`)
         detectLocation.value = 'Fora de area.'
       }
+    }
+    if(initiateMap.value) {
+      clearAllPolygons()
     }
   })
   const [names, map] = await Promise.all([

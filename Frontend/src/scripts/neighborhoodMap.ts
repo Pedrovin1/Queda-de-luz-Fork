@@ -3,11 +3,11 @@
 import { cacheManager } from './cacheManager'
 import { safeFetch } from './clientApi'
 
-let polygonsCleaner: google.maps.Polygon[] = []
+let polygonsCleaner: Map<string, google.maps.Polygon> = new Map();
 
-const clearNeighborhoodPolygons = () => {
+export const clearAllPolygons = () => {
   polygonsCleaner.forEach((p) => p.setMap(null))
-  polygonsCleaner = []
+  polygonsCleaner.clear()
 }
 
 export const fetchAllNeighborhoods = async (cityName: string): Promise<string[]> => {
@@ -106,20 +106,30 @@ export const neighborhoodOutlines = async (
   neighborhoodNames: string[],
   cityName: string,
   fixedCamera: boolean = true,
-): Promise<google.maps.Polygon[]> => {
-  const polygonsMap: google.maps.Polygon[] = []
-  const allBounds = new google.maps.LatLngBounds()
+): Promise<void> => {
 
-  const fetchPromises = neighborhoodNames.map(async (name) => {
-    const fullSearchName = `${name}, ${cityName}`
-    return { name, paths: await fetchNeighborhoodOutline(fullSearchName) }
-  })
+  const currentNameSet = new Set(neighborhoodNames);
 
-  const result = await Promise.all(fetchPromises)
+  for(const [name, polygon] of polygonsCleaner.entries()) {
+    if(!currentNameSet.has(name)){
+      polygon.setMap(null);
+      polygonsCleaner.delete(name)
+    }
+  }
 
-  clearNeighborhoodPolygons()
+  const fetchPromises = neighborhoodNames
+    .filter(name => !polygonsCleaner.has(name))
+    .map(async (name) => {
+      const fullSearchName = `${name}, ${cityName}`
+      return { name, paths: await fetchNeighborhoodOutline(fullSearchName)}
+    })
 
-  result.forEach(({ paths }) => {
+  const result = await Promise.all(fetchPromises);
+
+  const allBounds = new google.maps.LatLngBounds();
+
+  result.forEach(({ name, paths }) => {
+    if(paths.length <= 0) return;
     if (paths.length > 0) {
       const polygon = new google.maps.Polygon({
         paths: paths,
@@ -131,8 +141,8 @@ export const neighborhoodOutlines = async (
         map: map,
         zIndex: 15,
       })
-      polygonsCleaner.push(polygon)
-      polygonsMap.push(polygon)
+      
+      polygonsCleaner.set(name, polygon)
 
       paths.forEach((path) => {
         path.forEach((point) => allBounds.extend(point))
@@ -140,8 +150,8 @@ export const neighborhoodOutlines = async (
     }
   })
 
-  if (polygonsMap.length > 0 && fixedCamera) {
-    map.fitBounds(allBounds)
+  if (polygonsCleaner.size > 0 && fixedCamera) {
+    map.fitBounds(allBounds, 50)
   }
-  return polygonsMap
 }
+
