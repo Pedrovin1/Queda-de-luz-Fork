@@ -14,8 +14,12 @@ public class HomePageController : ControllerBase
     [Route("cities/{city_id}/districts")]
     public async Task<IActionResult> GetDistrictsAsync(int city_id)
     {
-        List<District> districts = await this._homePageService.GetDistrictsAsync(city_id);
-        if(districts is null || districts.Count <= 0){ return NotFound(); }
+        (List<District> districts, var error) = await this._homePageService.GetDistrictsAsync(city_id);
+
+        if(error is not null)
+        {
+            return this.StatusCode(error.StatusCode, error.Message);
+        }
 
         GetDistrictsResponse response = DistrictMapping.ToGetDistrictsResponse(districts);
 
@@ -28,10 +32,10 @@ public class HomePageController : ControllerBase
     public async Task<IActionResult> PostReportAsync(int city_id, int district_id, PostReportRequest request)
     {
         //<<TODO: to validate city--district relation>>
-        //<<TODO: if userId not null, then validate its existence>>
+        //<<TODO: if userId not null, then authenticate with who is sending the request>>
 
         Report report = request.ToReport(district_id);
-        report = await this._homePageService.PostReportAsync(report);
+        report= await this._homePageService.PostReportAsync(report);
 
         PostReportResponse response = report.ToPostReportResponse();
         
@@ -43,8 +47,12 @@ public class HomePageController : ControllerBase
     [Route("cities/{city_id}/statistics")]
     public async Task<IActionResult> GetCityStatistics(int city_id)
     {
-        //<<TODO: to validate city existence>>
-        GetCityStatisticsResponse response = await this._homePageService.GetCityStatistics(city_id);
+        (GetCityStatisticsResponse? response, var error) = await this._homePageService.GetCityStatistics(city_id);
+
+        if(error is not null)
+        {
+            return this.StatusCode(error.StatusCode, error.Message);
+        }
 
         return Ok(response);
     }
@@ -55,9 +63,12 @@ public class HomePageController : ControllerBase
     public async Task<IActionResult> GetCitiesAsync(string state_abbreviation)
     {
         state_abbreviation = state_abbreviation.ToUpper();
-        GetCitiesResponse? response = await this._homePageService.GetCitiesAsync(state_abbreviation);
+        (GetCitiesResponse? response, var error) = await this._homePageService.GetCitiesAsync(state_abbreviation);
 
-        if(response is null){ return NotFound(); }
+        if(error is not null)
+        { 
+            return this.StatusCode(error.StatusCode, error.Message); 
+        }
 
         return Ok(response);
     }

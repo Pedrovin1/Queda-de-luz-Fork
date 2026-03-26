@@ -1,3 +1,4 @@
+using System.ComponentModel.Design;
 using System.Data.SQLite;
 using Dapper;
 
@@ -9,7 +10,7 @@ public class HomePageService : IHomePageService
         this._dbConnectionFactory = connectionFactory;
     }
 
-    public async Task<List<District>> GetDistrictsAsync(int City_id)
+    public async Task<(List<District>, RequestError?)> GetDistrictsAsync(int City_id)
     {
         using SQLiteConnection dbContext = await this._dbConnectionFactory.CreateConnectionAsync();
 
@@ -37,8 +38,13 @@ public class HomePageService : IHomePageService
         );
 
         await dbContext.CloseAsync();
+
+        var response = result.ToList();
+        RequestError? error = response.Count <= 0 ? 
+                                new(StatusCodes.Status404NotFound, $"City Does NOT exist!")
+                                : null; 
         
-        return result.ToList();
+        return (response, error);
     }
 
     public async Task<Report> PostReportAsync(Report report)
@@ -79,16 +85,28 @@ public class HomePageService : IHomePageService
         return result;
     }
 
-    public async Task<GetCityStatisticsResponse> GetCityStatistics(int city_id)
+    public async Task<(GetCityStatisticsResponse?, RequestError?)> GetCityStatistics(int city_id)
     {
         using var dbContext = await this._dbConnectionFactory.CreateConnectionAsync();
 
-        string city_Name=string.Empty;
         Dictionary<int, DistrictStatistics> result = new();
-
-        _ = await dbContext.QueryAsync<string, District, ProblemCategory, long, bool>(
+        string? cityName = await dbContext.QueryFirstOrDefaultAsync<string?>(
             """
-                SELECT c.City_Name, 
+                SELECT City_Name FROM City 
+                WHERE City_id = @CityId
+            """,
+            new{ CityId = city_id }
+        );
+
+        if(cityName is null)
+        {
+            RequestError? error = new(StatusCodes.Status404NotFound, $"City Does NOT exist!");
+            return (default, error);
+        }
+
+        _ = await dbContext.QueryAsync<District, ProblemCategory, long, bool>(
+            """
+                SELECT 
                     dis.District_id, dis.District_Name, 
                     pc.Problem_Category_id, pc.Problem_Category_Name, 
                     COUNT(rep.Problem_Category_id) AS Reports_Amount
@@ -101,9 +119,8 @@ public class HomePageService : IHomePageService
                 GROUP BY dis.District_id, pc.Problem_Category_id;
             """,
 
-            (cityName, district, problemCategory, problemAmount) => 
+            (district, problemCategory, problemAmount) => 
             {
-                city_Name = city_Name == string.Empty ? cityName : city_Name;
                 if(!result.ContainsKey(district.Id)){result.Add(district.Id, 
                                                                 new DistrictStatistics(district.Name, new List<DistrictSingleStatistic>()));}
                 
@@ -116,15 +133,15 @@ public class HomePageService : IHomePageService
             ,
             new{ CityId = city_id }
             ,
-            splitOn: "District_id,Problem_Category_id,Reports_Amount"
+            splitOn: "Problem_Category_id,Reports_Amount"
         );
 
         await dbContext.CloseAsync();
 
-        return new GetCityStatisticsResponse(city_Name, result);
+        return (new GetCityStatisticsResponse(cityName, result), null);
     }
 
-    public async Task<GetCitiesResponse?> GetCitiesAsync(string state_abbreviation)
+    public async Task<(GetCitiesResponse?, RequestError?)> GetCitiesAsync(string state_abbreviation)
     {
         using var dbContext = await this._dbConnectionFactory.CreateConnectionAsync();
 
@@ -132,10 +149,10 @@ public class HomePageService : IHomePageService
             $"""
                 SELECT City_id, City_Name 
                 FROM City 
-                WHERE State_Abbreviation = '{state_abbreviation}'; 
+                WHERE State_Abbreviation = @stateAbbreviation; 
             """
-            //,
-            //new{ stateAbbreviation = state_abbreviation}
+            ,
+            new{ stateAbbreviation = state_abbreviation }
         );
 
         await dbContext.CloseAsync();
@@ -147,17 +164,21 @@ public class HomePageService : IHomePageService
             //response.Cities.Add( (c.Id, c.Name) );
         }
 
-        if(response.Cities is null || response.Cities.Count <= 0){ response = null; }
+        RequestError? error = null;
+        if(response.Cities is null || response.Cities.Count <= 0)
+        { 
+            error = new RequestError(StatusCodes.Status404NotFound, "State does NOT exist"); 
+        }
 
-        return response;
+        return (response, error);
     }
 
 }
 
 public interface IHomePageService
 {
-    public Task<List<District>> GetDistrictsAsync(int city_id);
+    public Task<(List<District>,            RequestError?)> GetDistrictsAsync(int city_id);
     public Task<Report> PostReportAsync(Report report);
-    public Task<GetCityStatisticsResponse> GetCityStatistics(int city_id);
-    public Task<GetCitiesResponse?> GetCitiesAsync(string state_abbreviation);
+    public Task<(GetCityStatisticsResponse?, RequestError?)> GetCityStatistics(int city_id);
+    public Task<(GetCitiesResponse?,        RequestError?)> GetCitiesAsync(string state_abbreviation);
 }
