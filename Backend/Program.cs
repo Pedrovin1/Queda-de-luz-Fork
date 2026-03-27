@@ -8,7 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
+builder.Services.AddScoped<HomePageValidator>();
 builder.Services.AddScoped<IHomePageService, HomePageService>();
+builder.Services.AddScoped<AccountSignInOutValidator>();
+builder.Services.AddScoped<IAccountSignInOutService, AccountSignInOutService>();
 
 //To Avoid Wasting Time for a prototype
 const string AllowAllPolicyName = "AllowAll";

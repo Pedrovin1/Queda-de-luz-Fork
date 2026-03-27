@@ -10,6 +10,32 @@ Content-Type: application/json
     "Account_id" : null
 }
 
+POST {{BlackoutMap_HostAddress}}/accounts
+Content-Type: application/json
+
+{
+    "Username": "NomeUsuario", 
+    "Unhashed_Password": "senha",
+    "Email": "email@email.com",
+    "District_Id": 1,
+    "Person_Details": null,
+    "Business_Details": null
+}
+
+# PersonAccountDetails: { DateOnly Birthday }
+# BusinessAccountDetails: {string CNPJ } 
+POST {{BlackoutMap_HostAddress}}/accounts
+Content-Type: application/json
+
+{
+    "Username": "NomeUsuario", 
+    "Unhashed_Password": "senha",
+    "Email": "email@email.com",
+    "District_Id": 1,
+    "Person_Details": { "Birthday": "2000-01-30"},
+    "Business_Details": null
+}
+
 
 GET {{BlackoutMap_HostAddress}}/homepage/cities/1/districts
 Accept: application/json
