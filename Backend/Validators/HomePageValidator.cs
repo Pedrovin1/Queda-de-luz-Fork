@@ -55,7 +55,9 @@ public class HomePageValidator
         requestIntegrityStatus = await results.ReadSingleAsync<bool>();
         if(requestIntegrityStatus == false)
         {
-            error = new RequestError(StatusCodes.Status400BadRequest, "Problem_Category Does NOT Exist");
+            error = new RequestError(StatusCodes.Status400BadRequest, 
+            "Problem_Category Does NOT Exist");
+            await dbContext.CloseAsync();
             return (requestIntegrityStatus, error);
         }
 
@@ -63,7 +65,9 @@ public class HomePageValidator
         requestIntegrityStatus = await results.ReadSingleAsync<bool>();
         if(requestIntegrityStatus == false)
         {
-            error = new RequestError(StatusCodes.Status400BadRequest, "City does NOT contain the specified District");
+            error = new RequestError(StatusCodes.Status400BadRequest, 
+            "City does NOT contain the specified District");
+            await dbContext.CloseAsync();
             return (requestIntegrityStatus, error);
         }
 
@@ -74,7 +78,9 @@ public class HomePageValidator
             requestIntegrityStatus = await results.ReadSingleAsync<bool>();  
             if(requestIntegrityStatus == false)
             {
-                error = new RequestError(StatusCodes.Status400BadRequest, "There are no Negative Reports of this type currently registered");
+                error = new RequestError(StatusCodes.Status400BadRequest, 
+                "There are no Negative Reports of this type currently registered");
+                await dbContext.CloseAsync();
                 return (requestIntegrityStatus, error);
             } 
         }

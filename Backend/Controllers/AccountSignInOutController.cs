@@ -16,7 +16,7 @@ public class AccountSignInOutController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> PostAccountAsync(PostAccountRequest request)
     {
-        (bool isValid, var error)= this._validator.IsValid(request);
+        (bool isValid, var error) = await this._validator.IsValid(request);
         if(isValid == false)
         { 
             return this.StatusCode(error!.StatusCode, error.Message); 
@@ -31,8 +31,15 @@ public class AccountSignInOutController : ControllerBase
         else{
             account = request.ToBusinessAccount(hashedPassword);
         }
-    
-        BaseAccount createdAccount = await this._accountService.CreateAccountAsync(account);
+
+        BaseAccount createdAccount;
+        try{
+            createdAccount = await this._accountService.CreateAccountAsync(account);
+        }
+        catch(Exception){
+            return this.StatusCode(StatusCodes.Status500InternalServerError);
+        }
+        
         PostAccountResponse response = createdAccount.ToPostAccountResponse();
 
         return Ok(response);
