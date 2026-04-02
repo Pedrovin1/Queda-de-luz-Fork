@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
@@ -45,5 +46,32 @@ public class AccountSignInOutController : ControllerBase
         return Ok(response);
         //return Created();
     }
+
+    [HttpGet]
+    [Route("/login")]
+    public async Task<IActionResult> LoginAccountGetTokenAsync(LoginAccountRequest request)
+    {
+        string token;
+        (bool isValid, var error) =  this._validator.IsValid(request);
+        if(isValid == false)
+        { 
+            return this.StatusCode(error!.StatusCode, error.Message); 
+        }
+
+        try{
+            (token, error) = await this._accountService.LoginAccountGetTokenAsync(request);
+        }
+        catch(Exception){
+            return this.StatusCode(StatusCodes.Status500InternalServerError);
+        }
+        
+        if(error is not null)
+        { 
+            return this.StatusCode(error!.StatusCode, error.Message); 
+        }
+
+        LoginAccountResponse response = new LoginAccountResponse(token);
+        return Ok(response);
+    } 
 
 }

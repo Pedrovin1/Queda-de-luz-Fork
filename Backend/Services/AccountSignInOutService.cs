@@ -4,10 +4,12 @@ using Dapper;
 public class AccountSignInOutService : IAccountSignInOutService
 {
     private IBlackoutMapConnectionFactory _connectionFactory;
+    private JWT_TokenService _tokenService;
 
-    public AccountSignInOutService(IBlackoutMapConnectionFactory connectionFactory)
+    public AccountSignInOutService(IBlackoutMapConnectionFactory connectionFactory, JWT_TokenService tokenService)
     {
         this._connectionFactory = connectionFactory;
+        this._tokenService = tokenService;
     }
 
     public string HashPassword(string unhashedPassword)
@@ -16,6 +18,71 @@ public class AccountSignInOutService : IAccountSignInOutService
         return unhashedPassword;
     }
 
+    public async Task<(string, RequestError?)> LoginAccountGetTokenAsync(LoginAccountRequest loginData)
+    {
+        string token = string.Empty;
+        RequestError? error = null;
+
+        string hashedPassword = this.HashPassword(loginData.Password);
+        using var dbContext = await this._connectionFactory.CreateConnectionAsync();
+
+        //<<SQL HERE ! ! ! ! !>>
+        SqlMapper.GridReader results = await dbContext.QueryMultipleAsync(
+            """
+                WITH user_info AS(
+                    SELECT Base_Account_id AS user_id FROM Base_Account 
+                    WHERE Username = @Username AND Hashed_password = @HashedPassword
+                )
+
+                SELECT user_id FROM user_info LIMIT 1;
+
+                SELECT (EXISTS( 
+                    SELECT Person_Account_id FROM Person_Account 
+                    WHERE Person_Account_id = ( SELECT user_id FROM user_info LIMIT 1 ) )
+                ) AS is_person_account;
+
+                SELECT (EXISTS( 
+                    SELECT Business_Account_id FROM Business_Account 
+                    WHERE Business_Account_id = ( SELECT user_id FROM user_info LIMIT 1 ) )
+                ) AS is_business_account;
+            """,
+            new {Username = loginData.Username, HashedPassword = hashedPassword}
+        );
+        
+        //verify if it found a Match in the Database
+        long? accountId = await results.ReadSingleAsync<long?>();
+        if(accountId is null)
+        {
+            error = new RequestError(
+                StatusCodes.Status400BadRequest,
+                "Incorrect Login Data"
+            );
+
+            return (token, error);
+        }
+
+        bool isPersonAccount = await results.ReadSingleAsync<bool>();
+        bool isBusinessAccount = await results.ReadSingleAsync<bool>();
+
+        //Verify possible inconsistency in the Database
+        if(isPersonAccount == true && isBusinessAccount == true)
+        {
+            throw new InvalidOperationException("Server Critical Error," +
+            " account is both Person and Business in the Database");
+        }
+
+        JWT_AccountData accountData;
+        if(isPersonAccount == true){
+            accountData = new((int)accountId, typeof(PersonAccount));
+        }else{
+            accountData = new((int)accountId, typeof(BusinessAccount));   
+        }
+
+        await dbContext.CloseAsync();
+
+        this._tokenService.CreateToken(accountData);
+        return (token, error);
+    }
 
     public async Task<BaseAccount> CreateAccountAsync(BaseAccount baseAccount)
     { 
@@ -83,5 +150,6 @@ public class AccountSignInOutService : IAccountSignInOutService
 public interface IAccountSignInOutService
 {
     public Task<BaseAccount> CreateAccountAsync(BaseAccount baseAccount);
+    public Task<(string, RequestError?)> LoginAccountGetTokenAsync(LoginAccountRequest loginData);
     public string HashPassword(string unhashedPassword);
 }

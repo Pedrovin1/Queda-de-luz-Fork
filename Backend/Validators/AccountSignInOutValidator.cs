@@ -71,4 +71,29 @@ public  class AccountSignInOutValidator
         await dbContext.CloseAsync();
         return (requestIntegrityStatus, error);
     }
+
+    public (bool, RequestError?) IsValid(LoginAccountRequest request)
+    {
+        bool isValid = true; 
+        RequestError? error = null;
+
+        if(request.Username is null || request.Username == string.Empty)
+        {
+            isValid = false;
+            error = new RequestError(
+                StatusCodes.Status400BadRequest,
+                "invalid username string format");
+            return (isValid, error);
+        }
+        if(request.Password is null || request.Password == string.Empty)
+        {
+            isValid = false;
+            error = new RequestError(
+                StatusCodes.Status400BadRequest,
+                "invalid password string format");
+            return (isValid, error);
+        }
+
+        return (isValid, error);
+    }
 }

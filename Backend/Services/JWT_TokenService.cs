@@ -14,7 +14,7 @@ public class JWT_TokenService
         this._secretKey = System.Text.Encoding.UTF8.GetBytes(secret);
     }
 
-    public string CreateToken(BaseAccount account)
+    public string CreateToken(JWT_AccountData accountData)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
 
@@ -25,7 +25,7 @@ public class JWT_TokenService
         var tokenDescriptor = new SecurityTokenDescriptor
         {  
             //<<TODO: to define Expiration time>>
-            Subject = this.GenerateClaimsIdentity(account),
+            Subject = this.GenerateClaimsIdentity(accountData),
             SigningCredentials = signingCredentials
         };
 
@@ -33,16 +33,16 @@ public class JWT_TokenService
         return tokenHandler.WriteToken(token);
     }
 
-    private ClaimsIdentity GenerateClaimsIdentity(BaseAccount account)
+    private ClaimsIdentity GenerateClaimsIdentity(JWT_AccountData accountData)
     {
         var claimsIdentity = new ClaimsIdentity();
 
         claimsIdentity.AddClaim( 
             new Claim(ClaimTypes.NameIdentifier, 
-                      account.Id.ToString())
+                      accountData.Id.ToString())
         );
 
-        string accountType = account is PersonAccount ? nameof(PersonAccount) 
+        string accountType = accountData.AccountType == typeof(PersonAccount) ? nameof(PersonAccount) 
                                                       : nameof(BusinessAccount);
         claimsIdentity.AddClaim( 
             new Claim(ClaimTypes.Role, 
