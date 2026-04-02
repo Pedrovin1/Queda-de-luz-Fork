@@ -29,10 +29,10 @@ public class AccountSignInOutService : IAccountSignInOutService
         //<<SQL HERE ! ! ! ! !>>
         SqlMapper.GridReader results = await dbContext.QueryMultipleAsync(
             """
-                WITH user_info AS(
+                CREATE TEMP TABLE IF NOT EXISTS user_info AS
                     SELECT Base_Account_id AS user_id FROM Base_Account 
                     WHERE Username = @Username AND Hashed_password = @HashedPassword
-                )
+                ;
 
                 SELECT user_id FROM user_info LIMIT 1;
 
@@ -50,7 +50,7 @@ public class AccountSignInOutService : IAccountSignInOutService
         );
         
         //verify if it found a Match in the Database
-        long? accountId = await results.ReadSingleAsync<long?>();
+        long? accountId = await results.ReadSingleOrDefaultAsync<long?>();
         if(accountId is null)
         {
             error = new RequestError(
@@ -58,6 +58,7 @@ public class AccountSignInOutService : IAccountSignInOutService
                 "Incorrect Login Data"
             );
 
+            await dbContext.CloseAsync();
             return (token, error);
         }
 
@@ -67,6 +68,7 @@ public class AccountSignInOutService : IAccountSignInOutService
         //Verify possible inconsistency in the Database
         if(isPersonAccount == true && isBusinessAccount == true)
         {
+            await dbContext.CloseAsync();
             throw new InvalidOperationException("Server Critical Error," +
             " account is both Person and Business in the Database");
         }
@@ -80,7 +82,7 @@ public class AccountSignInOutService : IAccountSignInOutService
 
         await dbContext.CloseAsync();
 
-        this._tokenService.CreateToken(accountData);
+        token = this._tokenService.CreateToken(accountData);
         return (token, error);
     }
 

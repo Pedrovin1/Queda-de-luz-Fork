@@ -48,7 +48,7 @@ public class AccountSignInOutController : ControllerBase
     }
 
     [HttpGet]
-    [Route("/login")]
+    [Route("login")]
     public async Task<IActionResult> LoginAccountGetTokenAsync(LoginAccountRequest request)
     {
         string token;
