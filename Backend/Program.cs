@@ -8,6 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
+if(builder.Configuration["SymmKey"] is null){throw new InvalidDataException("SymmKey Not Found");}
+builder.Services.AddTransient<JWT_TokenService>( args => { return new JWT_TokenService(builder.Configuration["SymmKey"]!); });
+
 builder.Services.AddScoped<HomePageValidator>();
 builder.Services.AddScoped<IHomePageService, HomePageService>();
 builder.Services.AddScoped<AccountSignInOutValidator>();
