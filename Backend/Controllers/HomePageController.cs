@@ -1,3 +1,8 @@
+using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
@@ -5,37 +10,66 @@ using Microsoft.AspNetCore.Mvc;
 public class HomePageController : ControllerBase
 {
     private readonly IHomePageService _homePageService;
-    public HomePageController(IHomePageService homePageService)
+    private readonly HomePageValidator _homePageValidator;
+    public HomePageController(IHomePageService homePageService, HomePageValidator homePageValidator)
     {
         this._homePageService = homePageService;
+        this._homePageValidator = homePageValidator;
     }
 
     [HttpGet]
     [Route("cities/{city_id}/districts")]
     public async Task<IActionResult> GetDistrictsAsync(int city_id)
     {
-        List<District> districts = await this._homePageService.GetDistrictsAsync(city_id);
-        if(districts is null || districts.Count <= 0){ return NotFound(); }
+        (List<District> districts, var error) = await this._homePageService.GetDistrictsAsync(city_id);
+
+        if(error is not null)
+        {
+            return this.StatusCode(error.StatusCode, error.Message);
+        }
 
         GetDistrictsResponse response = DistrictMapping.ToGetDistrictsResponse(districts);
 
         return Ok(response);
     }
 
-
+    // [Authorize("default")]
     [HttpPost]
     [Route("cities/{city_id}/districts/{district_id}/reports")]
+    [AllowAnonymous] //skip authorization process, but still validates the JWT token
     public async Task<IActionResult> PostReportAsync(int city_id, int district_id, PostReportRequest request)
     {
-        //<<TODO: to validate city--district relation>>
-        //<<TODO: if userId not null, then validate its existence>>
+        RequestError? error = null;
+        (bool isValid, error) = await this._homePageValidator.IsValid(request, city_id, district_id);
 
-        Report report = request.ToReport(district_id);
-        report = await this._homePageService.PostReportAsync(report);
+        if(isValid == false)
+        {
+            return this.StatusCode(error!.StatusCode, error.Message);
+        }
 
-        PostReportResponse response = report.ToPostReportResponse();
+        string? accountIdClaim = null;
+        //verifies if it the HTTP request has a valid Authorization Header
+        if(User.Identity is not null && User.Identity.IsAuthenticated == true)
+        {
+            accountIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? null;
+            if(accountIdClaim is null){
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Invalid token format");
+            }
+        }
+
+        int? parsedAccountId = accountIdClaim is null ? null
+                                                      : int.Parse(accountIdClaim);
+
+        Report report = request.ToReport(district_id, parsedAccountId);
+        try
+        {
+            report = await this._homePageService.PostReportAsync(report);
+        }
+        catch(Exception){
+            return this.StatusCode(StatusCodes.Status500InternalServerError);
+        }
         
-        //<<TODO: to create a GET endpoint to access reports>>
+        PostReportResponse response = report.ToPostReportResponse();
         return Ok(response);
     }
 
@@ -43,8 +77,12 @@ public class HomePageController : ControllerBase
     [Route("cities/{city_id}/statistics")]
     public async Task<IActionResult> GetCityStatistics(int city_id)
     {
-        //<<TODO: to validate city existence>>
-        GetCityStatisticsResponse response = await this._homePageService.GetCityStatistics(city_id);
+        (GetCityStatisticsResponse? response, var error) = await this._homePageService.GetCityStatisticsAsync(city_id);
+
+        if(error is not null)
+        {
+            return this.StatusCode(error.StatusCode, error.Message);
+        }
 
         return Ok(response);
     }
@@ -55,9 +93,12 @@ public class HomePageController : ControllerBase
     public async Task<IActionResult> GetCitiesAsync(string state_abbreviation)
     {
         state_abbreviation = state_abbreviation.ToUpper();
-        GetCitiesResponse? response = await this._homePageService.GetCitiesAsync(state_abbreviation);
+        (GetCitiesResponse? response, var error) = await this._homePageService.GetCitiesAsync(state_abbreviation);
 
-        if(response is null){ return NotFound(); }
+        if(error is not null)
+        { 
+            return this.StatusCode(error.StatusCode, error.Message); 
+        }
 
         return Ok(response);
     }

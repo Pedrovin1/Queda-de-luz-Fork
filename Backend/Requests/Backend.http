@@ -2,12 +2,38 @@
 
 
 POST {{BlackoutMap_HostAddress}}/homepage/cities/1/districts/1/reports
+Authorization: Bearer accountJWTtokenHere
 Content-Type: application/json
 
 {
-    "Is_Fixed": true,
-    "Problem_Category_id" : 1,
-    "Account_id" : null
+    "Is_Fixed": false,
+    "Problem_Category_id" : 1
+}
+
+POST {{BlackoutMap_HostAddress}}/accounts
+Content-Type: application/json
+
+{
+    "Username": "NomeUsuario", 
+    "Unhashed_Password": "senha",
+    "Email": "email@email.com",
+    "District_Id": 1,
+    "Person_Details": null,
+    "Business_Details": null
+}
+
+# PersonAccountDetails: { DateOnly Birthday }
+# BusinessAccountDetails: {string CNPJ } 
+POST {{BlackoutMap_HostAddress}}/accounts
+Content-Type: application/json
+
+{
+    "Username": "NomeNome", 
+    "Unhashed_Password": "sen423234ha",
+    "Email": "mail@email.com",
+    "District_Id": 1,
+    "Person_Details": { "Birthday": "2002-02-21"},
+    "Business_Details": null
 }
 
 
@@ -21,3 +47,13 @@ Accept: application/json
 
 GET {{BlackoutMap_HostAddress}}/homepage/states/RS/cities
 Accept: application/json
+
+
+GET {{BlackoutMap_HostAddress}}/accounts/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "Username": "NomeUsuario",
+    "Password": "123##447%$5"
+}

@@ -2,13 +2,47 @@ using System.Data;
 using System.Data.Common;
 using System.Data.SQLite;
 using Dapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
+
+const string secretKeyConfigPath = "SymmKey";
+if(builder.Configuration[secretKeyConfigPath] is null){throw new InvalidDataException("SymmKey Not Found");}
+
+builder.Services.AddAuthentication(
+    (s) => { 
+        s.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; 
+        s.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    }
+).AddJwtBearer(s =>
+    {
+        s.RequireHttpsMetadata = false; //should be false only in dev mode
+        s.SaveToken = true;
+        s.TokenValidationParameters = new TokenValidationParameters
+        {
+            IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.
+                            GetBytes(builder.Configuration[secretKeyConfigPath]!)),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    }
+);
+builder.Services.AddAuthorization();
+// (options =>
+// {
+//     options.AddPolicy("default", policy => policy.RequireRole([nameof(PersonAccount), nameof(BusinessAccount)]));
+// });
 
 //builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
+builder.Services.AddScoped<JWT_TokenService>( args => { return new JWT_TokenService(builder.Configuration[secretKeyConfigPath]!); });
+
+builder.Services.AddScoped<HomePageValidator>();
 builder.Services.AddScoped<IHomePageService, HomePageService>();
+builder.Services.AddScoped<AccountSignInOutValidator>();
+builder.Services.AddScoped<IAccountSignInOutService, AccountSignInOutService>();
 
 //To Avoid Wasting Time for a prototype
 const string AllowAllPolicyName = "AllowAll";
@@ -46,6 +80,8 @@ if (!Directory.Exists(DatabaseDirectory) || !File.Exists(DatabaseDirectory + Dat
 }
 
 var app = builder.Build();
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment()){ app.MapOpenApi(); }
