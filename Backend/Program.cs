@@ -44,6 +44,8 @@ builder.Services.AddScoped<IHomePageService, HomePageService>();
 builder.Services.AddScoped<AccountSignInOutValidator>();
 builder.Services.AddScoped<IAccountSignInOutService, AccountSignInOutService>();
 
+builder.Services.AddScoped<IChatService, ChatService>();
+
 //To Avoid Wasting Time for a prototype
 const string AllowAllPolicyName = "AllowAll";
 builder.Services.AddCors(options =>

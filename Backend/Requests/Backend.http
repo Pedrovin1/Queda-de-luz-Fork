@@ -36,6 +36,9 @@ Content-Type: application/json
     "Business_Details": null
 }
 
+GET {{BlackoutMap_HostAddress}}/accounts
+Accept: application/json
+
 
 GET {{BlackoutMap_HostAddress}}/homepage/cities/1/districts
 Accept: application/json
