@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref, computed, onUnmounted } from 'vue'
-import { initMap } from './scripts/map.ts'
-import { clearAllPolygons, fetchAllNeighborhoods, neighborhoodOutlines } from './scripts/neighborhoodMap.ts'
+import { initMap } from './scripts/maps/map.ts'
+import {
+  clearAllPolygons,
+  fetchAllNeighborhoods,
+  neighborhoodOutlines,
+} from './scripts/maps/neighborhoodMap.ts'
 
 //Variaveis de teste
 const city = ref<string>('Porto Alegre')
@@ -17,8 +21,8 @@ const newMessage = ref('')
 const activeTab = ref('chat')
 const loggedUser = ref(false)
 const messages = ref([{ user: 'Test', text: 'Mensagem de teste.' }])
-const toggleProfileChatView = () => {
-  activeTab.value = activeTab.value === 'chat' ? 'profile' : 'chat'
+const selectedTab = (tabName: string) => {
+  activeTab.value = activeTab.value === tabName ? 'chat' : tabName
 }
 const sendMessage = () => {
   if (newMessage.value.trim()) {
@@ -34,6 +38,10 @@ const sendMessage = () => {
     }, 50)
   }
 }
+const onlineUsers = ref([
+  { name: 'Visitante_Alpha', location: 'Bela Vista', status: 'Online' },
+  { name: 'Visitante_Beta', location: 'Centro Histórico', status: 'Online' },
+])
 
 //Variaveis para reporte
 const neighborhoodsList = ref<string[]>([])
@@ -72,7 +80,7 @@ const selectManual = (name: string) => {
   isChangingReport.value = false
 }
 
-const handleLocationDetected = async (e:any) => {
+const handleLocationDetected = async (e: any) => {
   const { neighborhood: newNeighborhood, city: newCity } = e.detail
 
   const strictCity = city.value !== ''
@@ -140,17 +148,16 @@ onMounted(async () => {
   //Carregamento da pagina é realizado sequencialmente
   //Evitar bug de chamadas de componentes não dependentes
 
-  try{
-    const names = await fetchAllNeighborhoods(city.value);
-    
-    neighborhoodsList.value = names;
+  try {
+    const names = await fetchAllNeighborhoods(city.value)
+
+    neighborhoodsList.value = names
 
     initiateMap.value = await initMap('map-canvas', city.value, neighborhoodsNoPower.value)
 
     console.log(`Mapa de ${city.value} foi carregado com ${names.length} bairros.`)
-
-  }catch(error){
-    console.warn("Erro ao realizar carregamento da pagina: ", error)
+  } catch (error) {
+    console.warn('Erro ao realizar carregamento da pagina: ', error)
   }
 
   if (neighborhoodsList.value.length === 0) {
@@ -160,7 +167,7 @@ onMounted(async () => {
 onUnmounted(() => {
   window.removeEventListener('neighborhood-detected', handleDetected)
   window.removeEventListener('location-detected', handleLocationDetected)
-  window.removeEventListener('map-neighborhood-clicked', ()=> {})
+  window.removeEventListener('map-neighborhood-clicked', () => {})
 })
 </script>
 
@@ -218,21 +225,33 @@ onUnmounted(() => {
     <div class="box-map" id="map-canvas"><h1>Map</h1></div>
     <div class="box-chat" :class="{ isHidden: !openChat }">
       <div class="box-chat-header">
-        <div class="box-chat-verify-logged" @click="toggleProfileChatView">
+        <div class="box-chat-verify-logged">
           <div class="box-chat-profile-image" :class="{ 'is-logged': loggedUser }"></div>
-          <span class="box-chat-islogged-text">{{
-            activeTab === 'chat'
-              ? loggedUser
-                ? 'Meu perfil'
-                : 'Entrar / Cadastro'
-              : 'Voltar ao chat'
-          }}</span>
+          <div class="box-chat-toggle-profile-online">
+            <span class="button-switch-profile" @click="selectedTab('profile')">{{
+              activeTab === 'profile'
+                ? loggedUser
+                  ? 'Meu perfil'
+                  : 'Entrar / Cadastro'
+                : 'Voltar ao chat'
+            }}</span>
+            <span
+              v-if="loggedUser"
+              :class="{ 'is-active': activeTab === 'online' }"
+              class="button-switch-online"
+              @click="selectedTab('online')"
+            >
+              {{
+                activeTab === 'online' ? 'Fechar Lista' : `${onlineUsers.length} usuarios online`
+              }}
+            </span>
+          </div>
         </div>
         <button class="box-chat-button" @click="openChat = false">X</button>
       </div>
       <div class="box-chat-content">
         <Transition name="slide" mode="out-in">
-          <div v-if="activeTab === 'chat'" key="chat" class="box-chat-viewchat">
+          <div v-if="activeTab === 'chat'" key="chat" class="box-chat-view-chat">
             <div class="box-chat-messages">
               <div v-for="(msg, index) in messages" :key="index" class="message">
                 <strong>{{ msg.user }}: </strong>{{ msg.text }}
@@ -248,7 +267,7 @@ onUnmounted(() => {
               <button @click="sendMessage">➤</button>
             </div>
           </div>
-          <div v-else key="profile" class="box-chat-viewprofile">
+          <div v-else-if="activeTab === 'profile'" key="profile" class="box-chat-viewprofile">
             <div v-if="!loggedUser" class="box-chat-loginform">
               <h3>Acessar a conta</h3>
               <input type="text" placeholder="E-mail" />
@@ -283,6 +302,27 @@ onUnmounted(() => {
               </table>
               <button class="box-chat-viewprofile-logoutbutton" @click="loggedUser = false">
                 Sair da conta
+              </button>
+            </div>
+          </div>
+          <div v-else-if="activeTab === 'online'" key="online" class="box-chat-viewonline">
+            <div class="box-chat-viewonline-container">
+              <table class="box-chat-viewonline-table">
+                <thead>
+                  <tr>
+                    <th>Usuário</th>
+                    <th>Local</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="user in onlineUsers" :key="user.name">
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.location }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <button class="box-chat-viewonline-logoutbutton" @click="selectedTab('chat')">
+                Voltar ao chat
               </button>
             </div>
           </div>

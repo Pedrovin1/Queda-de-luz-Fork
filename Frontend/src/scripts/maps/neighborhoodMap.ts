@@ -1,9 +1,9 @@
 //Funções de gerenciamento de parametros de bairros
 
-import { cacheManager } from './cacheManager'
-import { safeFetch } from './clientApi'
+import { cacheManager } from '../utils/cacheManager'
+import { safeFetch } from '../utils/clientApi'
 
-let polygonsCleaner: Map<string, google.maps.Polygon> = new Map();
+let polygonsCleaner: Map<string, google.maps.Polygon> = new Map()
 
 export const clearAllPolygons = () => {
   polygonsCleaner.forEach((p) => p.setMap(null))
@@ -107,29 +107,28 @@ export const neighborhoodOutlines = async (
   cityName: string,
   fixedCamera: boolean = true,
 ): Promise<void> => {
+  const currentNameSet = new Set(neighborhoodNames)
 
-  const currentNameSet = new Set(neighborhoodNames);
-
-  for(const [name, polygon] of polygonsCleaner.entries()) {
-    if(!currentNameSet.has(name)){
-      polygon.setMap(null);
+  for (const [name, polygon] of polygonsCleaner.entries()) {
+    if (!currentNameSet.has(name)) {
+      polygon.setMap(null)
       polygonsCleaner.delete(name)
     }
   }
 
   const fetchPromises = neighborhoodNames
-    .filter(name => !polygonsCleaner.has(name))
+    .filter((name) => !polygonsCleaner.has(name))
     .map(async (name) => {
       const fullSearchName = `${name}, ${cityName}`
-      return { name, paths: await fetchNeighborhoodOutline(fullSearchName)}
+      return { name, paths: await fetchNeighborhoodOutline(fullSearchName) }
     })
 
-  const result = await Promise.all(fetchPromises);
+  const result = await Promise.all(fetchPromises)
 
-  const allBounds = new google.maps.LatLngBounds();
+  const allBounds = new google.maps.LatLngBounds()
 
   result.forEach(({ name, paths }) => {
-    if(paths.length <= 0) return;
+    if (paths.length <= 0) return
     if (paths.length > 0) {
       const polygon = new google.maps.Polygon({
         paths: paths,
@@ -141,7 +140,7 @@ export const neighborhoodOutlines = async (
         map: map,
         zIndex: 15,
       })
-      
+
       polygonsCleaner.set(name, polygon)
 
       paths.forEach((path) => {
@@ -154,4 +153,3 @@ export const neighborhoodOutlines = async (
     map.fitBounds(allBounds, 50)
   }
 }
-

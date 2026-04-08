@@ -1,7 +1,7 @@
 /// <reference types="google.maps" />
 import { createCityMask, fetchCityBounds, fetchCityOutline } from './cityMap'
 import { neighborhoodOutlines } from './neighborhoodMap'
-import { addUserlocationMarker, fetchAllLocation } from './userLocation'
+import { addUserlocationMarker, fetchAllLocation } from '../user/userLocation'
 
 //Funções para inicialização e customização do mapa
 
@@ -51,9 +51,9 @@ export async function initMap(elementId: string, city: string, neighborhoods: st
 
     createCityMask(mapOutput, outlineCity)
 
-    await addUserlocationMarker(mapOutput, outlineCity)
-
     await neighborhoodOutlines(mapOutput, neighborhoods, city)
+
+    await addUserlocationMarker(mapOutput, outlineCity)
 
     return mapOutput
   }

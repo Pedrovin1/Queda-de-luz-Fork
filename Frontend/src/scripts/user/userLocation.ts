@@ -1,7 +1,7 @@
 //Funções de gerenciamento de parametros da cidade
 
-import { cacheManager } from './cacheManager'
-import { safeFetch } from './clientApi'
+import { cacheManager } from './utils/cacheManager'
+import { safeFetch } from './utils/clientApi'
 
 interface UserLocation {
   city: string
