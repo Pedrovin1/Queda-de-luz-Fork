@@ -213,6 +213,12 @@ const handleLoginStay = () => {
   selectedTab('profile')
 }
 
+const handleInputDropdownClick = () => {
+  registerForm.value.bairro_criacao = ''
+
+  selectRegisterNeighborhood.value = !selectRegisterNeighborhood.value
+}
+
 const filteredRegisterNeighborhoods = computed(() =>
   neighborhoodsList.value.filter((n) =>
     n.toLowerCase().includes(registerForm.value.bairro_criacao.toLowerCase()),
@@ -413,12 +419,11 @@ onUnmounted(() => {
                     max="2025-12-31"
                     required
                   />
-                  <div class="box-chat-registerform-neighborhood">
+                  <div class="box-chat-registerform-neighborhood" @click="handleInputDropdownClick">
                     <input
                       v-model="registerForm.bairro_criacao"
                       type="text"
                       placeholder="Seu bairro"
-                      @focus="selectRegisterNeighborhood = true"
                       readonly
                       required
                     />
@@ -429,7 +434,7 @@ onUnmounted(() => {
                       <li
                         v-for="n in filteredNeighborhoods"
                         :key="n"
-                        @click="selectingRegisterNeighborhood(n)"
+                        @click.stop="selectingRegisterNeighborhood(n)"
                       >
                         {{ n }}
                       </li>

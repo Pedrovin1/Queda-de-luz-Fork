@@ -23,11 +23,11 @@ export const fetchAllNeighborhoods = async (cityName: string): Promise<string[]>
   }
 
   const query = `
-    [out:json][timeout:25];
+    [out:json];
     area["name"="${cityName}"]["admin_level"="8"]->.searchArea;
     (
-      way["place"~"suburb|neighbourhood|quarter"](area.searchArea);
-      relation["place"~"suburb|neighbourhood|quarter"](area.searchArea);
+      relation["admin_level"="10"](area.searchArea);
+      way["admin_level"="10"](area.searchArea);
     );
     out tags;
   `
