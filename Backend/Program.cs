@@ -43,7 +43,7 @@ builder.Services.AddScoped<HomePageValidator>();
 builder.Services.AddScoped<IHomePageService, HomePageService>();
 builder.Services.AddScoped<AccountSignInOutValidator>();
 builder.Services.AddScoped<IAccountSignInOutService, AccountSignInOutService>();
-
+builder.Services.AddScoped<ChatValidator>();
 builder.Services.AddScoped<IChatService, ChatService>();
 
 //To Avoid Wasting Time for a prototype

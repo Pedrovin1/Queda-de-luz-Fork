@@ -72,15 +72,36 @@ public class ChatService : IChatService
         throw new NotImplementedException();
     }
 
-    public async Task<object> PostMessageAsync()
+    public async Task<Message> PostMessageAsync(Message messageToCreate, int chatId)
     {
-        throw new NotImplementedException();
+        var dbContext = await this._connectionFactory.CreateConnectionAsync();
+        
+        var createdMessage = await dbContext.QuerySingleAsync<Message>(
+            """
+                INSERT INTO MESSAGE (Message_text, Base_Account_Id) 
+                VALUES (@MessageText, @AccountId)
+                RETURNING *;
+            """,
+            new{ MessageText = messageToCreate.Text, AccountId = messageToCreate.AccountId }
+        );
+
+        await dbContext.ExecuteAsync(
+            """
+                INSERT INTO Chat_has_message (Chat_Id, Message_Id)
+                VALUES (@ChatId, @MessageId);
+            """,
+            new{ChatId = chatId, MessageId = createdMessage.Id }
+        );
+        
+        await dbContext.CloseAsync();
+
+        return createdMessage;
     }
 }
 
 public interface IChatService
 {
-    public Task<object> PostMessageAsync();
+    public Task<Message> PostMessageAsync(Message messageToCreate, int chatId);
     public Task<object> GetRecentMessagesAsync();
     public Task<(GetChatMembersResponse?, RequestError?)> GetChatMembersAsync(int chatId);
 }

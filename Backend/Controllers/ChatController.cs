@@ -1,3 +1,6 @@
+using System.Runtime.CompilerServices;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 
@@ -14,11 +17,33 @@ public class ChatController : ControllerBase
         this._validator = validator;
     }
 
-    public Task<IActionResult> PostMessageAsyc()
+    // [RequestSizeLimit(52428800)] //<<TODO: to implement image file handling safeguards>>
+    [HttpPost]
+    [Authorize]
+    [Route("{chat_id}/messages")]
+    public async Task<IActionResult> PostMessageAsync(int chat_id, PostMessageRequest request)
     {
-        return default;
+        (bool isValid, RequestError? error) = await this._validator.IsValid(request, chat_id);
+        if(isValid == false)
+        {
+            return this.StatusCode(error!.StatusCode, error.Message);
+        }
+
+        string? textUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? null;
+        if(textUserId is null)
+        {
+            return this.StatusCode(StatusCodes.Status500InternalServerError, "Invalid token format");
+        }
+        int parsedId = int.Parse(textUserId);
+
+        Message message = request.ToMessage(parsedId);
+        Message createdMessage = await this._chatService.PostMessageAsync(message, chat_id);
+
+        var response = createdMessage.ToPostMessageResponse();
+        return Ok(response);
+        // return Created(response);
     } 
-    public Task<IActionResult> GetRecentMessagesAsyc()
+    public Task<IActionResult> GetRecentMessagesAsync()
     {
         return default;
     } 
