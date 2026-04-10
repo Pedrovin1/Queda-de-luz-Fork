@@ -43,7 +43,7 @@ public class HomePageValidator
 
                 {extraQuery}
             """,
-            new{problemId = request.Problem_Category_id, 
+            new{problemId = request.Problem_Category_Id, 
                 cityId = cityId, 
                 districtId = districtId}
         );

@@ -1,3 +1,3 @@
 public record PostMessageRequest(
-    string Message_text
+    string Message_Text
 );
