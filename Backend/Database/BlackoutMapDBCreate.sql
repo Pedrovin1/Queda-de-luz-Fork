@@ -68,3 +68,35 @@ CREATE TABLE IF NOT EXISTS Recent_Report( --Aux table to index specific (recent)
 	FOREIGN KEY (Report_id) REFERENCES Report(Report_id)
 ); ---------------------------------------------------------------------------------------------
 
+
+CREATE TABLE IF NOT EXISTS Message  (
+	Message_id INTEGER PRIMARY KEY,
+	
+	Message_text TEXT NOT NULL CHECK(length(Message_text) <= 1000),
+	Message_image_link TEXT,
+	UTC_datetime_sent INTEGER DEFAULT ( unixepoch('now') ) NOT NULL ,
+	Is_hidden BOOLEAN DEFAULT (FALSE) NOT NULL,
+	
+	Base_Account_id INTEGER NOT NULL,
+	
+	FOREIGN KEY (Base_Account_id) REFERENCES Base_Account(Base_Account_id)
+); ---------------------------------------------------------------------------------------------
+
+
+CREATE TABLE IF NOT EXISTS Chat  (
+	Chat_id INTEGER PRIMARY KEY,
+	District_id INTEGER NOT NULL,
+
+	FOREIGN KEY (District_id) REFERENCES District(District_id)
+); ---------------------------------------------------------------------------------------------
+
+
+CREATE TABLE IF NOT EXISTS Chat_has_message  (
+	Chat_has_message_id INTEGER PRIMARY KEY,
+	
+	Message_id INTEGER NOT NULL,
+	Chat_id INTEGER NOT NULL,
+
+	FOREIGN KEY (Message_id) REFERENCES Message(Message_id),
+	FOREIGN KEY (Chat_id) REFERENCES Chat(Chat_id)
+); ---------------------------------------------------------------------------------------------

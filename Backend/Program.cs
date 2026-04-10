@@ -43,6 +43,8 @@ builder.Services.AddScoped<HomePageValidator>();
 builder.Services.AddScoped<IHomePageService, HomePageService>();
 builder.Services.AddScoped<AccountSignInOutValidator>();
 builder.Services.AddScoped<IAccountSignInOutService, AccountSignInOutService>();
+builder.Services.AddScoped<ChatValidator>();
+builder.Services.AddScoped<IChatService, ChatService>();
 
 //To Avoid Wasting Time for a prototype
 const string AllowAllPolicyName = "AllowAll";
@@ -61,6 +63,7 @@ const string DatabaseDirectory = @".\Database\";
 const string DatabaseFile = @"BlackoutMap.db";
 const string connectionString= @"Data Source=" + DatabaseDirectory + DatabaseFile;
 const string DBCreationSqlPath = DatabaseDirectory + "BlackoutMapDBCreate.sql";
+const string DBInsertsSqlPath = DatabaseDirectory + "DistrictAndChatInserts.sql";
 
 builder.Services.AddSingleton<IBlackoutMapConnectionFactory>(_ => new BlackoutMapConnectionFactory(connectionString));
 builder.Services.AddHostedService<AutoUpdateRecentReportsService>();
@@ -71,11 +74,14 @@ if (!Directory.Exists(DatabaseDirectory) || !File.Exists(DatabaseDirectory + Dat
     File.Create(DatabaseDirectory + DatabaseFile).Close();
 
     var connFactory = new BlackoutMapConnectionFactory(connectionString);
-    
     using var DB_Generator = await connFactory.CreateConnectionAsync();
-    string sqlCreate = await File.ReadAllTextAsync(DBCreationSqlPath);
+    
+    string sqlCommands = await File.ReadAllTextAsync(DBCreationSqlPath);
+    await DB_Generator.ExecuteAsync(sqlCommands);
 
-    await DB_Generator.ExecuteAsync(sqlCreate);
+    sqlCommands = await File.ReadAllTextAsync(DBInsertsSqlPath);
+    await DB_Generator.ExecuteAsync(sqlCommands);
+
     await DB_Generator.CloseAsync();
 }
 

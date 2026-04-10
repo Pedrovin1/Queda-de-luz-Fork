@@ -4,7 +4,7 @@ public class BaseAccount{
     public int  Id {get; set;}
     public string Username {get; set;}
     public string HashedPassword {get; set;} = string.Empty;
-    public string Email {get; set;}
+    public string Email {get; set;} = string.Empty;
     public string? Description {get; set;} = string.Empty;
     public string? ProfilePictureLink {get; set;} = null;
 
@@ -30,6 +30,14 @@ public class BaseAccount{
         this.UTC_DatetimeCreation = UTC_datetime_creation;
         this.AdvertisementSlotsAmount = (int)Advertisement_slots_amount;
         this.DistrictId = (int)District_id;
+    }
+
+    //to recover from the database
+    public BaseAccount(long Base_Account_id, string Username, string? Profile_picture_link)
+    {
+        this.Id = (int)Base_Account_id;
+        this.Username = Username;
+        this.ProfilePictureLink = Profile_picture_link;
     }
 }
 

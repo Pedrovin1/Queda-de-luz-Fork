@@ -31,9 +31,24 @@ Content-Type: application/json
     "Username": "NomeNome", 
     "Unhashed_Password": "sen423234ha",
     "Email": "mail@email.com",
-    "District_Id": 1,
+    "District_Id": 5320131,
     "Person_Details": { "Birthday": "2002-02-21"},
     "Business_Details": null
+}
+
+#GET Chat Members
+GET {{BlackoutMap_HostAddress}}/chats/5320131/members
+Accept: application/json
+
+GET {{BlackoutMap_HostAddress}}/chats/5320129/messages
+Accept: application/json
+
+POST {{BlackoutMap_HostAddress}}/chats/1/messages
+Content-Type: application/json
+Authorization: Bearer accountJWTtokenHere
+
+{
+    "Message_text": "Message here"
 }
 
 

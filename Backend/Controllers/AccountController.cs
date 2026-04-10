@@ -3,12 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("accounts")]
-public class AccountSignInOutController : ControllerBase
+public class AccountController : ControllerBase
 {
     private IAccountSignInOutService _accountService;
     private AccountSignInOutValidator _validator;
 
-    public AccountSignInOutController(IAccountSignInOutService service, AccountSignInOutValidator validator)
+    public AccountController(IAccountSignInOutService service, AccountSignInOutValidator validator)
     {
         this._accountService = service;
         this._validator = validator;
