@@ -3,7 +3,7 @@ public record GetChatMembersResponse(
 );
 
 public record ChatMemberSummary(
-    int Id,
+    int Account_Id,
     string Username,
     string? Profile_Picture_Link
 );

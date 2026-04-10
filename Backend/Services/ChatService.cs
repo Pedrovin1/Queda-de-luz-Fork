@@ -57,7 +57,7 @@ public class ChatService : IChatService
         {
             membersSummary.Add(
                 new ChatMemberSummary(
-                    Id:account.Id,
+                    Account_Id:account.Id,
                     Username: account.Username,
                     Profile_Picture_Link: account.ProfilePictureLink)
             );

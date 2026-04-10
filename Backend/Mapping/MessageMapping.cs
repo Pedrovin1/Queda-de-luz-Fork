@@ -3,7 +3,7 @@ public static class MessageMapping
     public static Message ToMessage(this PostMessageRequest request, int userId)
     {
         return new Message(
-            Message_text: request.Message_text,
+            Message_text: request.Message_Text,
             Base_Account_id: userId
         );
     }
@@ -11,7 +11,7 @@ public static class MessageMapping
     public static PostMessageResponse ToPostMessageResponse(this Message message)
     {
         return new PostMessageResponse(
-            Id: (int)message.Id!,
+            Message_Id: (int)message.Id!,
             Text: message.Text,
             Image_Link: message.ImageLink!,
             utc_Time_Sent: (long)message.UTC_TimeSent!,

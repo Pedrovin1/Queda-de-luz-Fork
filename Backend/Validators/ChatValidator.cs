@@ -39,7 +39,7 @@ public class ChatValidator
         }
 
         //empty message
-        if(string.IsNullOrWhiteSpace(request.Message_text))
+        if(string.IsNullOrWhiteSpace(request.Message_Text))
         {
             error = new RequestError(
                 StatusCodes.Status400BadRequest,
@@ -49,7 +49,7 @@ public class ChatValidator
         }
         
         //message too large
-        if(request.Message_text.Length > Message_Max_Char_Size)
+        if(request.Message_Text.Length > Message_Max_Char_Size)
         {
             error = new RequestError(
                 StatusCodes.Status400BadRequest,

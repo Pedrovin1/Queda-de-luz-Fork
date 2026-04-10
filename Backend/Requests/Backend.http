@@ -36,9 +36,8 @@ Content-Type: application/json
     "Business_Details": null
 }
 
-GET {{BlackoutMap_HostAddress}}/chats/2/members
-Accept: application/json
-GET {{BlackoutMap_HostAddress}}/chats/1/members
+#GET Chat Members
+GET {{BlackoutMap_HostAddress}}/chats/5320131/members
 Accept: application/json
 
 GET {{BlackoutMap_HostAddress}}/chats/5320129/messages
