@@ -14,7 +14,7 @@ public static class MessageMapping
             Id: (int)message.Id!,
             Text: message.Text,
             Image_Link: message.ImageLink!,
-            UTC_Time_Sent: (long)message.UTC_TimeSent!,
+            utc_Time_Sent: (long)message.UTC_TimeSent!,
             Account_Id: message.AccountId,
             Is_Hidden: message.IsHidden
         );

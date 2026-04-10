@@ -42,10 +42,20 @@ public class ChatController : ControllerBase
         var response = createdMessage.ToPostMessageResponse();
         return Ok(response);
         // return Created(response);
-    } 
-    public Task<IActionResult> GetRecentMessagesAsync()
+    }
+
+    [HttpGet]
+    [Route("{chat_id}/messages")]
+    public async Task<IActionResult> GetRecentMessagesAsync(int chat_id)
     {
-        return default;
+        (GetRecentMessagesResponse? response, var error) = await this._chatService.GetRecentMessagesAsync(chat_id);
+        
+        if(error is not null)
+        {
+            return this.StatusCode(error.StatusCode, error.Message);
+        }
+
+        return Ok(response);
     } 
     
     [HttpGet]

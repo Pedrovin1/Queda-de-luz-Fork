@@ -5,5 +5,5 @@ public record GetChatMembersResponse(
 public record ChatMemberSummary(
     int Id,
     string Username,
-    string? ProfilePictureLink
+    string? Profile_Picture_Link
 );
