@@ -5,18 +5,23 @@ import { safeFetch } from '../utils/clientApi'
 
 let polygonsCleaner: Map<string, google.maps.Polygon> = new Map()
 
+export interface NeighborhoodInfo {
+  id: number;
+  name: string;
+} 
+
 export const clearAllPolygons = () => {
   polygonsCleaner.forEach((p) => p.setMap(null))
   polygonsCleaner.clear()
 }
 
-export const fetchAllNeighborhoods = async (cityName: string): Promise<string[]> => {
+export const fetchAllNeighborhoods = async (cityName: string): Promise<NeighborhoodInfo[]> => {
   if (!cityName) return []
 
   const cacheNeighborhoods = `${cityName}-neighborhoods`
 
   try {
-    const cached = cacheManager.get<string[]>(cacheNeighborhoods)
+    const cached = cacheManager.get<NeighborhoodInfo[]>(cacheNeighborhoods)
     if (cached) return cached
   } catch (e) {
     console.warn('Erro ao ler cache da lista de bairros.')
@@ -45,15 +50,20 @@ export const fetchAllNeighborhoods = async (cityName: string): Promise<string[]>
 
     console.log(data.elements)
 
-    const names = data.elements
-      .map((el: any) => el.tags.name)
-      .filter((name: string | undefined): name is string => !!name)
+    const neighborhoodPackage = data.elements
+      .map((el: any) => ({
+        id: el.id,
+        name: el.tags.name
+      }))
+      .filter((n: NeighborhoodInfo) => n.name !== '')
 
-    const sendNeighborhoods = Array.from<string>(new Set(names)).sort()
+    const sendNeighborhoods = [...new Map<string, NeighborhoodInfo>(neighborhoodPackage.map((n: NeighborhoodInfo) => [n.name, n])
+      ).values()
+    ].sort((a: NeighborhoodInfo, b:NeighborhoodInfo) => a.name.localeCompare(b.name))
 
     cacheManager.set(cacheNeighborhoods, sendNeighborhoods, 7)
 
-    return sendNeighborhoods
+    return sendNeighborhoods as NeighborhoodInfo[]
   } catch (e) {
     console.error('Erro ao pegar bairros com Overpass: ', e)
     return []

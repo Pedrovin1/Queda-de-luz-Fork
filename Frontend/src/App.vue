@@ -4,6 +4,7 @@ import { initMap } from './scripts/maps/map.ts'
 import {
   clearAllPolygons,
   fetchAllNeighborhoods,
+  type NeighborhoodInfo,
   neighborhoodOutlines,
 } from './scripts/maps/neighborhoodMap.ts'
 import { registrarContaCPF, type UserCPF } from './scripts/user/userCPF.ts'
@@ -45,7 +46,7 @@ const onlineUsers = ref([
 ])
 
 //Variaveis para reporte
-const neighborhoodsList = ref<string[]>([])
+const neighborhoodsList = ref<NeighborhoodInfo[]>([])
 const detectLocation = ref('')
 const putManualLocation = ref('')
 const isChangingReport = ref(false)
@@ -55,7 +56,7 @@ const displayNeighborhood = computed(
 )
 const filteredNeighborhoods = computed(() =>
   neighborhoodsList.value.filter((n) =>
-    n.toLowerCase().includes(searchReportQuery.value.toLocaleLowerCase()),
+    n.name.toLowerCase().includes(searchReportQuery.value.toLocaleLowerCase()),
   ),
 )
 const handleDetected = (e: any) => (detectLocation.value = e.detail.name)
@@ -152,10 +153,11 @@ const registerForm = ref({
   senha: '',
   data: '',
   bairro_criacao: '',
+  bairro_id: 0,
 })
 
 const handleRegistration = async () => {
-  const { nome, razao_social, telefone, email, senha, data, bairro_criacao } = registerForm.value
+  const { nome, razao_social, telefone, email, senha, data, bairro_criacao,bairro_id } = registerForm.value
 
   try {
     if (razaoSocial.value === 'CPF') {
@@ -167,6 +169,7 @@ const handleRegistration = async () => {
         senha: senha,
         data_nascimento: data,
         bairro_criacao: bairro_criacao || detectLocation.value,
+        bairro_id: bairro_id,
         descrição: '',
         imagem_perfil_link: '',
       }
@@ -181,6 +184,7 @@ const handleRegistration = async () => {
         senha: senha,
         data_criação: data,
         bairro_criacao: bairro_criacao || detectLocation.value,
+        bairro_id: bairro_id,
         descrição: '',
         imagem_perfil_link: '',
         slot_anuncio_quantidade: 3,
@@ -221,12 +225,13 @@ const handleInputDropdownClick = () => {
 
 const filteredRegisterNeighborhoods = computed(() =>
   neighborhoodsList.value.filter((n) =>
-    n.toLowerCase().includes(registerForm.value.bairro_criacao.toLowerCase()),
+    n.name.toLowerCase().includes(registerForm.value.bairro_criacao.toLowerCase()),
   ),
 )
 
-const selectingRegisterNeighborhood = (name: string) => {
-  registerForm.value.bairro_criacao = name
+const selectingRegisterNeighborhood = (neighborhood: NeighborhoodInfo) => {
+  registerForm.value.bairro_criacao = neighborhood.name
+  registerForm.value.bairro_id = neighborhood.id
   selectRegisterNeighborhood.value = false
   InputFix('bairro_criacao')
 }
@@ -335,8 +340,8 @@ onUnmounted(() => {
             class="box-report-input"
           />
           <ul class="box-report-dropdown">
-            <li v-for="n in filteredNeighborhoods" :key="n" @click="selectManual(n)">
-              {{ n }}
+            <li v-for="n in filteredNeighborhoods" :key="n.id" @click="selectManual(n.name)">
+              {{ n.name}}
             </li>
           </ul>
           <button class="box-report-btn-change" @click="isChangingReport = false">Cancelar</button>
@@ -513,10 +518,10 @@ onUnmounted(() => {
                     >
                       <li
                         v-for="n in filteredNeighborhoods"
-                        :key="n"
+                        :key="n.id"
                         @click.stop="selectingRegisterNeighborhood(n)"
                       >
-                        {{ n }}
+                        {{ n.name }}
                       </li>
                     </ul>
                     <span

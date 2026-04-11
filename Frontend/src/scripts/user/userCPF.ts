@@ -9,7 +9,8 @@ export interface UserCPF {
   descrição: string
   imagem_perfil_link: string
   data_nascimento: string
-  bairro_criacao: string
+  bairro_criacao: string,
+  bairro_id: number
 }
 
 export const registrarContaCPF = async (userData: UserCPF) => {
@@ -19,7 +20,7 @@ export const registrarContaCPF = async (userData: UserCPF) => {
     Username: userData.nome,
     Unhashed_Password: userData.senha,
     Email: userData.email,
-    District_Id: 1,
+    District_Id: userData.bairro_id,
     Person_Details: {
       Birthday: userData.data_nascimento,
     },

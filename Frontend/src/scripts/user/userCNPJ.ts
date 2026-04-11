@@ -8,7 +8,8 @@ export interface UserCNPJ {
   imagem_perfil_link: string
   data_criação: string
   slot_anuncio_quantidade: number
-  bairro_criacao: string
+  bairro_criacao: string,
+  bairro_id: number
 }
 
 export const registrarContaCNPJ = async (userData: UserCNPJ) => {
