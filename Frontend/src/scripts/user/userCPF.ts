@@ -1,17 +1,6 @@
-const API_BANCO_DE_DADOS = 'http://localhost:5176/accounts'
+import { type UserCPF } from "./userGeneric"
 
-export interface UserCPF {
-  nome: string
-  cpf: string
-  telefone: string
-  email: string
-  senha: string
-  descrição: string
-  imagem_perfil_link: string
-  data_nascimento: string
-  bairro_criacao: string
-  bairro_id: number
-}
+const API_BANCO_DE_DADOS = 'http://localhost:5176/accounts'
 
 export const registrarContaCPF = async (userData: UserCPF) => {
   console.log(userData)
@@ -44,6 +33,16 @@ export const registrarContaCPF = async (userData: UserCPF) => {
     return await response.json()
   } catch (e) {
     console.error('Erro ao tentar criar conta: ', e)
+    throw e
+  }
+}
+
+export const loginContaCPF = async(userData: UserCPF) => {
+
+  try{
+
+  }catch(e) {
+    console.error('Erro ao tentar pegar conta: ', e)
     throw e
   }
 }

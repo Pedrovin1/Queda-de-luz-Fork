@@ -7,8 +7,9 @@ import {
   type NeighborhoodInfo,
   neighborhoodOutlines,
 } from './scripts/maps/neighborhoodMap.ts'
-import { registrarContaCPF, type UserCPF } from './scripts/user/userCPF.ts'
-import { registrarContaCNPJ, type UserCNPJ } from './scripts/user/userCNPJ.ts'
+import { registrarContaCPF } from './scripts/user/userCPF.ts'
+import { registrarContaCNPJ } from './scripts/user/userCNPJ.ts'
+import type { userGeneric, UserCPF, UserCNPJ } from './scripts/user/userGeneric.ts'
 
 //Variaveis de teste
 const city = ref<string>('Porto Alegre')
@@ -145,6 +146,13 @@ const isRegistered = ref(false)
 const razaoSocial = ref('CPF')
 const selectRegisterNeighborhood = ref(false)
 
+const loginForm = ref({
+  email: '',
+  senha: '',
+  razao_social: '',
+
+})
+
 const registerForm = ref({
   nome: '',
   razao_social: '',
@@ -157,37 +165,33 @@ const registerForm = ref({
 })
 
 const handleRegistration = async () => {
-  const { nome, razao_social, telefone, email, senha, data, bairro_criacao, bairro_id } =
-    registerForm.value
+  const { nome, razao_social, telefone, email, senha, data, bairro_criacao, bairro_id } = registerForm.value
+
+  const baseData: userGeneric ={
+    nome,
+    telefone,
+    email,
+    senha,
+    bairro_criacao : bairro_criacao || detectLocation.value,
+    bairro_id,
+    descrição: '',
+    imagem_perfil_link: '',
+  }
 
   try {
     if (razaoSocial.value === 'CPF') {
       const newUser: UserCPF = {
-        nome: nome,
+        ...baseData,
         cpf: razao_social,
-        telefone: telefone,
-        email: email,
-        senha: senha,
         data_nascimento: data,
-        bairro_criacao: bairro_criacao || detectLocation.value,
-        bairro_id: bairro_id,
-        descrição: '',
-        imagem_perfil_link: '',
       }
 
       await registrarContaCPF(newUser)
     } else {
       const newUser: UserCNPJ = {
-        nome: nome,
+        ...baseData,
         cnpj: razao_social,
-        telefone: telefone,
-        email: email,
-        senha: senha,
-        data_criação: data,
-        bairro_criacao: bairro_criacao || detectLocation.value,
-        bairro_id: bairro_id,
-        descrição: '',
-        imagem_perfil_link: '',
+        data_criacao: data,
         slot_anuncio_quantidade: 3,
       }
 
