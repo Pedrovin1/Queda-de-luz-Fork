@@ -148,19 +148,22 @@ public class AccountService : IAccountService
         throw new InvalidDataException("Object is neither Person nor Business Account");
     }
 
-    public async Task<(GetAccountDataResponse, RequestError?)> GetAccountData(int account_id, string clientAccountTypeClaim, bool includePrivateData)
+    public async Task<(GetAccountDataResponse, RequestError?)> GetAccountData(int account_id, string? clientAccountTypeClaim, bool includePrivateData)
     {
         RequestError? error = null;
 
+        string? accountType = clientAccountTypeClaim;
         PersonAccountData? personData = null;
         BusinessAccountData? businessData = null;
 
+        //<<TODO: if client type is null, check its type and existence>>
+
         using var dbcontext = await this._connectionFactory.CreateConnectionAsync();
 
-        switch(clientAccountTypeClaim)
+        switch(accountType)
         {
             case nameof(PersonAccount): 
-                PersonAccountData result = (await dbcontext.QueryAsync<PersonAccount, string, PersonAccountData>(
+                PersonAccountData pResult = (await dbcontext.QueryAsync<PersonAccount, string, PersonAccountData>(
                 """
                     SELECT 
                         p.Birthday, ba.Username, ba.Email, ba.Description, 
@@ -181,10 +184,32 @@ public class AccountService : IAccountService
                 splitOn: "District_Name"
                 )).First();
 
-                personData = result;
+                personData = pResult;
             break;
+        //--------------------------------------------------------
             case nameof(BusinessAccount):
-                throw new NotImplementedException();
+                BusinessAccountData bResult = (await dbcontext.QueryAsync<BusinessAccount, string, BusinessAccountData>(
+                """
+                    SELECT 
+                        b.Cnpj, ba.Username, ba.Email, ba.Description, 
+                        ba.Advertisement_slots_amount, ba.District_id, ba.Profile_picture_link,
+                        d.District_Name
+                    FROM 
+                        Base_Account AS ba JOIN
+                        Business_Account AS b ON ba.Base_Account_id = b.Business_Account_id JOIN
+                        District AS d       ON ba.District_id = d.District_Id
+                    WHERE
+                        ba.Base_Account_id = @accountId;
+                """
+                ,
+                (business, districtName) => { return business.ToBusinessAccountData(districtName, includePrivateData: includePrivateData); }
+                ,
+                new{ accountId = account_id}
+                ,
+                splitOn: "District_Name"
+                )).First();
+
+                businessData = bResult;
             break; 
         }
        
@@ -199,7 +224,7 @@ public interface IAccountService
 {
     public Task<BaseAccount> CreateAccountAsync(BaseAccount baseAccount);
     public Task<(string, RequestError?)> LoginAccountGetTokenAsync(LoginAccountRequest loginData);
-    public Task<(GetAccountDataResponse, RequestError?)> GetAccountData(int account_id, string clientAccountTypeClaim, bool includePrivateData);
+    public Task<(GetAccountDataResponse, RequestError?)> GetAccountData(int account_id, string? clientAccountTypeClaim, bool includePrivateData);
 
     public string HashPassword(string unhashedPassword);
 }

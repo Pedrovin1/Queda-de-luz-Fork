@@ -28,4 +28,33 @@ public static  class AccountDataMapping
             privateData
         );
     }
+
+    public static BusinessAccountData ToBusinessAccountData(this BusinessAccount account, string districtName, bool includePrivateData)
+    {
+        Public_BusinessAccountData publicData = new Public_BusinessAccountData(
+            username: account.Username,
+            email: account.Email,
+            description: account.Description ?? string.Empty,
+            profile_Picture_Link: account.ProfilePictureLink,
+            district_Id: account.DistrictId,
+            district_Name: districtName,
+            Visible_Ads:  new(),
+
+            cnpj: account.CNPJ
+        );
+
+        Private_BusinessAccountData? privateData = null;
+        if(includePrivateData == true)
+        {
+            privateData = new Private_BusinessAccountData(
+                advertisement_Slots_Amount: account.AdvertisementSlotsAmount,
+                Hidden_Ads: new()
+            );
+        }
+
+        return new BusinessAccountData(
+            publicData,
+            privateData
+        );
+    }
 }
