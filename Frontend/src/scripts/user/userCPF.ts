@@ -1,4 +1,4 @@
-import { type UserCPF } from "./userGeneric"
+import { type UserCPF } from './userGeneric'
 
 const API_BANCO_DE_DADOS = 'http://localhost:5176/accounts'
 
@@ -37,12 +37,33 @@ export const registrarContaCPF = async (userData: UserCPF) => {
   }
 }
 
-export const loginContaCPF = async(userData: UserCPF) => {
+export const logarContaCPF = async (username: string): Promise<UserCPF> => {
+  try {
+    const response = await fetch(`${API_BANCO_DE_DADOS}/${username}`)
 
-  try{
+    if(!response.ok){
+      throw new Error(`Erro ao buscar dados do CPF: ${response.status}`)
+    }
 
-  }catch(e) {
-    console.error('Erro ao tentar pegar conta: ', e)
+    const data = await response.json()
+
+
+    return {
+      nome: data.Username,
+      email: data.Email,
+      senha: '',
+      telefone: data.Telefone  || '', //Refazer quando inserido telefone pelo backend
+      descricao: '',
+      imagem_perfil_link: '',
+      bairro_id: Number(data.District_Id),
+      bairro_criacao: '',
+      cpf: data.CPF,
+      data_nascimento: new Date(data.UTC_datetime_creation).toLocaleDateString('pt-BR')
+      
+    }
+
+  } catch (e) {
+    console.error('Erro ao tentar GET da conta: ', e)
     throw e
   }
 }

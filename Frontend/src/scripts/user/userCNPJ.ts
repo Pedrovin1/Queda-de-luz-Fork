@@ -1,4 +1,4 @@
-import { type UserCNPJ } from "./userGeneric"
+import { type UserCNPJ } from './userGeneric'
 
 const API_BANCO_DE_DADOS = 'http://localhost:5176/accounts'
 
@@ -35,6 +35,36 @@ export const registrarContaCNPJ = async (userData: UserCNPJ) => {
     return await response.json()
   } catch (e) {
     console.error('Erro ao tentar criar conta: ', e)
+    throw e
+  }
+}
+
+export const logarContaCNPJ = async(username: string): Promise<UserCNPJ> => {
+  try{
+    const response = await fetch(`${API_BANCO_DE_DADOS}/${username}`)
+
+    if(!response.ok){
+      throw new Error(`Erro ao buscar dados da conta: ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    return {
+      nome: data.Username,
+      email: data.Email,
+      senha: '',
+      telefone: data.Telefone  || '', //Refazer quando inserido telefone pelo backend
+      descricao: '',
+      imagem_perfil_link: '',
+      bairro_id: Number(data.District_Id),
+      bairro_criacao: '',
+      cnpj: data.CNPJ,
+      data_criacao: new Date(data.UTC_datetime_creation).toLocaleDateString('pt-BR'),
+      slot_anuncio_quantidade: data.Advertisement_slots_amount
+    }
+
+  }catch(e){
+    console.error("Erro ao efetuar GET:", e)
     throw e
   }
 }

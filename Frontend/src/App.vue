@@ -7,9 +7,10 @@ import {
   type NeighborhoodInfo,
   neighborhoodOutlines,
 } from './scripts/maps/neighborhoodMap.ts'
-import { registrarContaCPF } from './scripts/user/userCPF.ts'
-import { registrarContaCNPJ } from './scripts/user/userCNPJ.ts'
-import type { userGeneric, UserCPF, UserCNPJ } from './scripts/user/userGeneric.ts'
+import { logarContaCPF, registrarContaCPF } from './scripts/user/userCPF.ts'
+import { logarContaCNPJ, registrarContaCNPJ } from './scripts/user/userCNPJ.ts'
+import type { UserGeneric, UserCPF, UserCNPJ, UserLogin } from './scripts/user/userGeneric.ts'
+import { fetchLogin } from './scripts/user/authLogin.ts'
 
 //Variaveis de teste
 const city = ref<string>('Porto Alegre')
@@ -141,6 +142,7 @@ const loadNeighborhoodList = async (attempts = 3) => {
 
 //Variaveis de conta
 
+const currentUser = ref<UserLogin>({email: '', senha: ''})
 const loggedUser = ref(false)
 const isRegistered = ref(false)
 const razaoSocial = ref('CPF')
@@ -149,8 +151,6 @@ const selectRegisterNeighborhood = ref(false)
 const loginForm = ref({
   email: '',
   senha: '',
-  razao_social: '',
-
 })
 
 const registerForm = ref({
@@ -164,17 +164,37 @@ const registerForm = ref({
   bairro_id: 0,
 })
 
-const handleRegistration = async () => {
-  const { nome, razao_social, telefone, email, senha, data, bairro_criacao, bairro_id } = registerForm.value
+const handleLogin = async() => {
+  try{
+    const authData = await fetchLogin(loginForm.value)
 
-  const baseData: userGeneric ={
+    if(authData.Person_Details !== null) {
+      currentUser.value = await logarContaCPF(authData.Username)
+    }else{
+      currentUser.value = await logarContaCNPJ(authData.Username)
+    }
+
+    loggedUser.value = true
+    activeTab.value = 'chat'
+    console.log(`Acesso na conta de ${currentUser.value.email} carregado com sucesso`)
+
+  }catch(e){
+    console.error("Erro ao tentar login: ", e)
+  }
+}
+
+const handleRegistration = async () => {
+  const { nome, razao_social, telefone, email, senha, data, bairro_criacao, bairro_id } =
+    registerForm.value
+
+  const baseData: UserGeneric = {
     nome,
     telefone,
     email,
     senha,
-    bairro_criacao : bairro_criacao || detectLocation.value,
+    bairro_criacao: bairro_criacao || detectLocation.value,
     bairro_id,
-    descrição: '',
+    descricao: '',
     imagem_perfil_link: '',
   }
 
