@@ -39,5 +39,15 @@ public class BaseAccount{
         this.Username = Username;
         this.ProfilePictureLink = Profile_picture_link;
     }
+
+    public BaseAccount(string Username, string Email, string? Description, long Advertisement_slots_amount, long District_id, string? Profile_picture_link)
+    {
+        this.Username = Username; 
+        this.Email = Email; 
+        this.Description = Description ?? string.Empty; 
+        this.AdvertisementSlotsAmount = (int)Advertisement_slots_amount; 
+        this.DistrictId = (int)District_id; 
+        this.ProfilePictureLink = Profile_picture_link;
+    }
 }
 

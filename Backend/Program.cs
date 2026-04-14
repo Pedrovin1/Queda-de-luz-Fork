@@ -41,8 +41,8 @@ builder.Services.AddScoped<JWT_TokenService>( args => { return new JWT_TokenServ
 
 builder.Services.AddScoped<HomePageValidator>();
 builder.Services.AddScoped<IHomePageService, HomePageService>();
-builder.Services.AddScoped<AccountSignInOutValidator>();
-builder.Services.AddScoped<IAccountSignInOutService, AccountSignInOutService>();
+builder.Services.AddScoped<AccountValidator>();
+builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ChatValidator>();
 builder.Services.AddScoped<IChatService, ChatService>();
 

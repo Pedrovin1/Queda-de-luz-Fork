@@ -36,6 +36,10 @@ Content-Type: application/json
     "Business_Details": null
 }
 
+GET {{BlackoutMap_HostAddress}}/accounts/2
+Authorization: Bearer accountJWTtokenHere
+Accept: application/json
+
 #GET Chat Members
 GET {{BlackoutMap_HostAddress}}/chats/5320131/members
 Accept: application/json
@@ -69,6 +73,6 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "Username": "NomeUsuario",
-    "Password": "123##447%$5"
+    "Username": "NomeNome333",
+    "Password": "sen423234ha"
 }

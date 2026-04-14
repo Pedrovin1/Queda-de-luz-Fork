@@ -18,4 +18,13 @@ public class BusinessAccount : BaseAccount
     {
         this.CNPJ = Cnpj;
     }
+
+    //to recover from the Database
+    //Get Account Data endpoint
+    public BusinessAccount( string Cnpj, 
+                            string Username, string Email, string? Description, long Advertisement_slots_amount, long District_id, string? Profile_picture_link) 
+                            : base(Username, Email, Description, Advertisement_slots_amount, District_id, Profile_picture_link)
+    {
+        this.CNPJ = Cnpj;
+    }
 }

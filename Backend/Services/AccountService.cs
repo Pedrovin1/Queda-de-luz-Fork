@@ -1,12 +1,12 @@
 using System.Text.Json;
 using Dapper;
 
-public class AccountSignInOutService : IAccountSignInOutService
+public class AccountService : IAccountService
 {
     private IBlackoutMapConnectionFactory _connectionFactory;
     private JWT_TokenService _tokenService;
 
-    public AccountSignInOutService(IBlackoutMapConnectionFactory connectionFactory, JWT_TokenService tokenService)
+    public AccountService(IBlackoutMapConnectionFactory connectionFactory, JWT_TokenService tokenService)
     {
         this._connectionFactory = connectionFactory;
         this._tokenService = tokenService;
@@ -147,11 +147,80 @@ public class AccountSignInOutService : IAccountSignInOutService
         dbcontext.Close();
         throw new InvalidDataException("Object is neither Person nor Business Account");
     }
+
+    public async Task<(GetAccountDataResponse, RequestError?)> GetAccountData(int account_id, string accountType, bool includePrivateData)
+    {
+        // RequestError? error = null;
+        PersonAccountData? personData = null;
+        BusinessAccountData? businessData = null;
+
+        using var dbcontext = await this._connectionFactory.CreateConnectionAsync();
+
+        switch(accountType)
+        {
+            case nameof(PersonAccount): 
+                PersonAccountData pResult = (await dbcontext.QueryAsync<PersonAccount, string, PersonAccountData>(
+                """
+                    SELECT 
+                        p.Birthday, ba.Username, ba.Email, ba.Description, 
+                        ba.Advertisement_slots_amount, ba.District_id, ba.Profile_picture_link,
+                        d.District_Name
+                    FROM 
+                        Base_Account AS ba JOIN
+                        Person_Account AS p ON ba.Base_Account_id = p.Person_Account_id JOIN
+                        District AS d       ON ba.District_id = d.District_Id
+                    WHERE
+                        ba.Base_Account_id = @accountId;
+                """
+                ,
+                (person, districtName) => { return person.ToPersonAccountData(districtName, includePrivateData: includePrivateData); }
+                ,
+                new{ accountId = account_id}
+                ,
+                splitOn: "District_Name"
+                )).First();
+
+                personData = pResult;
+            break;
+        //--------------------------------------------------------
+            case nameof(BusinessAccount):
+                BusinessAccountData bResult = (await dbcontext.QueryAsync<BusinessAccount, string, BusinessAccountData>(
+                """
+                    SELECT 
+                        b.Cnpj, ba.Username, ba.Email, ba.Description, 
+                        ba.Advertisement_slots_amount, ba.District_id, ba.Profile_picture_link,
+                        d.District_Name
+                    FROM 
+                        Base_Account AS ba JOIN
+                        Business_Account AS b ON ba.Base_Account_id = b.Business_Account_id JOIN
+                        District AS d       ON ba.District_id = d.District_Id
+                    WHERE
+                        ba.Base_Account_id = @accountId;
+                """
+                ,
+                (business, districtName) => { return business.ToBusinessAccountData(districtName, includePrivateData: includePrivateData); }
+                ,
+                new{ accountId = account_id}
+                ,
+                splitOn: "District_Name"
+                )).First();
+
+                businessData = bResult;
+            break; 
+        }
+       
+        await dbcontext.CloseAsync();
+
+        GetAccountDataResponse response = new GetAccountDataResponse(personData, businessData);
+        return (response, null);
+    }
 }
 
-public interface IAccountSignInOutService
+public interface IAccountService
 {
     public Task<BaseAccount> CreateAccountAsync(BaseAccount baseAccount);
     public Task<(string, RequestError?)> LoginAccountGetTokenAsync(LoginAccountRequest loginData);
+    public Task<(GetAccountDataResponse, RequestError?)> GetAccountData(int account_id, string accountType, bool includePrivateData);
+
     public string HashPassword(string unhashedPassword);
 }

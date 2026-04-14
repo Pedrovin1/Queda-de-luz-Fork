@@ -18,4 +18,13 @@ public class PersonAccount : BaseAccount
     {
         this.Birthday = DateOnly.Parse(Birthday);
     }
+
+    //to recover from the database
+    //Get Account Data endpoint
+    public PersonAccount(   string Birthday, 
+                            string Username, string Email, string? Description, long Advertisement_slots_amount, long District_id, string? Profile_picture_link) 
+                            : base( Username, Email, Description, Advertisement_slots_amount, District_id, Profile_picture_link)
+    {
+        this.Birthday = DateOnly.Parse(Birthday);
+    }
 }

@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -5,10 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 [Route("accounts")]
 public class AccountController : ControllerBase
 {
-    private IAccountSignInOutService _accountService;
-    private AccountSignInOutValidator _validator;
+    private IAccountService _accountService;
+    private AccountValidator _validator;
 
-    public AccountController(IAccountSignInOutService service, AccountSignInOutValidator validator)
+    public AccountController(IAccountService service, AccountValidator validator)
     {
         this._accountService = service;
         this._validator = validator;
@@ -73,5 +75,50 @@ public class AccountController : ControllerBase
         LoginAccountResponse response = new LoginAccountResponse(token);
         return Ok(response);
     } 
+
+    [HttpGet]
+    [AllowAnonymous]
+    [Route("{account_id}")]
+    public async Task<IActionResult> GetAccountData(int account_id)
+    {
+        RequestError? error = null;
+        GetAccountDataResponse response;
+
+        string? clientIdClaim = null;
+        string? clientAccountTypeClaim = null;
+        if(User.Identity is not null && User.Identity.IsAuthenticated == true)
+        {
+            clientIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? null;
+            clientAccountTypeClaim = User.FindFirstValue(ClaimTypes.Role) ?? null;
+            if(clientIdClaim is null){
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Invalid token format");
+            }
+        }
+
+        int? parsedClientId = clientIdClaim is null ? null
+                                                      : int.Parse(clientIdClaim);
+
+        bool isRequestingSelfData = (account_id == parsedClientId);
+        string? accountType = clientAccountTypeClaim;
+
+        if(isRequestingSelfData == false)
+        {
+            bool accountExists;
+            (accountExists, accountType, error) = await this._validator.AccountExistsAsync(account_id);  
+            if(accountExists == false)
+            {
+                return this.StatusCode(error!.StatusCode, error.Message);
+            }
+        }
+        
+        (response, error) = await this._accountService.GetAccountData(account_id, accountType!, isRequestingSelfData);
+        
+        if(error is not null)
+        {
+            return this.StatusCode(error!.StatusCode, error.Message);
+        }
+
+        return Ok(response);
+    }
 
 }
