@@ -148,15 +148,11 @@ public class AccountService : IAccountService
         throw new InvalidDataException("Object is neither Person nor Business Account");
     }
 
-    public async Task<(GetAccountDataResponse, RequestError?)> GetAccountData(int account_id, string? clientAccountTypeClaim, bool includePrivateData)
+    public async Task<(GetAccountDataResponse, RequestError?)> GetAccountData(int account_id, string accountType, bool includePrivateData)
     {
         RequestError? error = null;
-
-        string? accountType = clientAccountTypeClaim;
         PersonAccountData? personData = null;
         BusinessAccountData? businessData = null;
-
-        //<<TODO: if client type is null, check its type and existence>>
 
         using var dbcontext = await this._connectionFactory.CreateConnectionAsync();
 

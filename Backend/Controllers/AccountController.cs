@@ -97,9 +97,26 @@ public class AccountController : ControllerBase
 
         int? parsedClientId = clientIdClaim is null ? null
                                                       : int.Parse(clientIdClaim);
+
+        bool isRequestingSelfData = (account_id == parsedClientId);
+        string? accountType = clientAccountTypeClaim;
+
+        if(isRequestingSelfData == false)
+        {
+            bool accountExists;
+            (accountExists, accountType, error) = await this._validator.AccountExistsAsync(account_id);  
+            if(accountExists == false)
+            {
+                return this.StatusCode(error!.StatusCode, error.Message);
+            }
+        }
         
-        bool includePrivateData = (account_id == parsedClientId);
-        (response, error) = await this._accountService.GetAccountData(account_id, clientAccountTypeClaim!, includePrivateData);
+        (response, error) = await this._accountService.GetAccountData(account_id, accountType, isRequestingSelfData);
+        
+        if(error is not null)
+        {
+            return this.StatusCode(error!.StatusCode, error.Message);
+        }
 
         return Ok(response);
     }
