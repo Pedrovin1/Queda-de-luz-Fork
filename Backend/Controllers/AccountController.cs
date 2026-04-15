@@ -49,7 +49,7 @@ public class AccountController : ControllerBase
         //return Created();
     }
 
-    [HttpGet]
+    [HttpPost]
     [Route("login")]
     public async Task<IActionResult> LoginAccountGetTokenAsync(LoginAccountRequest request)
     {

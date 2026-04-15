@@ -68,9 +68,8 @@ GET {{BlackoutMap_HostAddress}}/homepage/states/RS/cities
 Accept: application/json
 
 
-GET {{BlackoutMap_HostAddress}}/accounts/login
+POST {{BlackoutMap_HostAddress}}/accounts/login
 Content-Type: application/json
-Accept: application/json
 
 {
     "Username": "NomeNome333",
