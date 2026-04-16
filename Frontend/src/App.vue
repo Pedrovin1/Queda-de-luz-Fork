@@ -9,7 +9,13 @@ import {
 } from './scripts/maps/neighborhoodMap.ts'
 import { registrarContaCPF } from './scripts/user/userCPF.ts'
 import { registrarContaCNPJ } from './scripts/user/userCNPJ.ts'
-import type { UserGeneric, UserCPF, UserCNPJ, UserLogin, UserAccount } from './scripts/user/userGeneric.ts'
+import type {
+  UserGeneric,
+  UserCPF,
+  UserCNPJ,
+  UserLogin,
+  UserAccount,
+} from './scripts/user/userGeneric.ts'
 import { giveAccountInfo } from './scripts/user/authLogin.ts'
 
 //Variaveis de teste
@@ -166,22 +172,27 @@ const registerForm = ref({
 
 const handleLogin = async () => {
   try {
-    const {account} = await giveAccountInfo(loginForm.value)
+    const { account } = await giveAccountInfo(loginForm.value)
+
+    console.log(
+      `dados de loginForm: Nome -> ${loginForm.value.nome}| Senha -> ${loginForm.value.senha}`,
+    )
 
     currentUser.value = account
-    
+
     loggedUser.value = true
     activeTab.value = 'chat'
     console.log(`Acesso na conta de ${currentUser.value.nome} carregado com sucesso`)
 
-    if(account.accountType === 'PersonAccount') {
-      console.log("Essa é uma conta pessoal")
-    }else if(account.accountType === 'BusinessAccount'){
-      console.log("Essa é uma conta empresarial")
-    }else{
-      console.log("A conta não possui nenhum tipo")
+    if (currentUser.value.accountType === 'PersonAccount') {
+      console.log('Essa é uma conta pessoal')
+    } else if (currentUser.value.accountType === 'BusinessAccount') {
+      console.log('Essa é uma conta empresarial')
+    } else {
+      console.log('A conta não possui nenhum tipo')
     }
 
+    console.log(`Você esta logado na conta de ${currentUser.value.nome}`)
   } catch (e) {
     console.error('Erro ao tentar login: ', e)
   }
@@ -586,31 +597,64 @@ onUnmounted(() => {
               </Transition>
             </div>
             <div v-else class="box-chat-profile-table-container">
-              <table class="box-chat-profile-table">
-                <thead>
-                  <tr>
-                    <th colspan="2">Dados do usuário</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Nome:</td>
-                    <td>Visitante Teste</td>
-                  </tr>
-                  <tr>
-                    <td>Localização:</td>
-                    <td>Porto Alegre, RS</td>
-                  </tr>
-                  <tr>
-                    <td>Status:</td>
-                    <td><span class="status-online">Online</span></td>
-                  </tr>
-                  <tr>
-                    <td>Notificações:</td>
-                    <td>Ativadas</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div
+                v-if="currentUser?.accountType === 'PersonAccount'"
+                class="box-chat-profile-cpf-container"
+              >
+                <table class="box-chat-profile-table">
+                  <thead>
+                    <tr>
+                      <th colspan="2">Dados do usuário</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Nome:</td>
+                      <td>{{ currentUser.nome }}</td>
+                    </tr>
+                    <tr>
+                      <td>Localização:</td>
+                      <td>Porto Alegre, RS</td>
+                    </tr>
+                    <tr>
+                      <td>Status:</td>
+                      <td><span class="status-online">Online</span></td>
+                    </tr>
+                    <tr>
+                      <td>Notificações:</td>
+                      <td>Ativadas</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div v-else class="box-chat-profile-cnpj-container">
+                <table class="box-chat-profile-table">
+                  <thead>
+                    <tr>
+                      <th colspan="2">Dados do empresa</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Nome:</td>
+                      <td>{{ currentUser?.nome }}</td>
+                    </tr>
+                    <tr>
+                      <td>Localização:</td>
+                      <td>Porto Alegre, RS</td>
+                    </tr>
+                    <tr>
+                      <td>Status:</td>
+                      <td><span class="status-online">Online</span></td>
+                    </tr>
+                    <tr>
+                      <td>Notificações:</td>
+                      <td>Ativadas</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
               <button class="box-chat-viewprofile-logoutbutton" @click="loggedUser = false">
                 Sair da conta
               </button>

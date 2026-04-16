@@ -43,14 +43,13 @@ const verifyLogin = async (token: string) => {
   const userId = parseInt(decode.nameid)
   const userRole = decode.role
 
-  return {userId, userRole}
+  return { userId, userRole }
 }
 
-export const giveAccountInfo = async (credentials: UserLogin):Promise<{account: UserAccount}> => {
-
+export const giveAccountInfo = async (credentials: UserLogin) => {
   const token = await fetchToken(credentials)
 
-  const {userId, userRole} = await verifyLogin(token)
+  const { userId, userRole } = await verifyLogin(token)
 
   console.log(`Esse é o token: ${token}, e esse é o userId: ${userId}`)
 
@@ -75,19 +74,33 @@ export const giveAccountInfo = async (credentials: UserLogin):Promise<{account: 
 
     let account: UserAccount
 
-    if(userRole === 'PersonAccount'){
-      account ={
-        ...accountData,
-        accountType: 'PersonAccount' as const
-      } as UserCPF
-    }else{
+    if (userRole === 'PersonAccount') {
+      const publicData = accountData.person_Account_Data.public_Data
       account = {
-        ...accountData,
-        accountType: 'BusinessAccount' as const
+        nome: publicData.username,
+        email: publicData.email,
+        telefone: '',
+        data_nascimento: publicData.birthday,
+        bairro_criacao: publicData.distric_name,
+        imagem_perfil_link: publicData.profile_Picture_Link,
+        descricao: publicData.description,
+        accountType: 'PersonAccount' as const,
+      } as UserCPF
+    } else {
+      const publicData = accountData.business_Account_Data.public_Data
+      account = {
+        nome: publicData.username,
+        email: publicData.email,
+        telefone: '',
+        cnpj: publicData.cnpj,
+        bairro_criacao: publicData.distric_name,
+        imagem_perfil_link: publicData.profile_Picture_Link,
+        descricao: publicData.description,
+        accountType: 'BusinessAccount' as const,
       } as UserCNPJ
     }
-
-    return {account}
+    console.log(account)
+    return { account }
   } catch (e) {
     console.error('Erro ao buscar conta: ', e)
     throw e
