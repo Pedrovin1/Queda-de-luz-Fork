@@ -1,3 +1,6 @@
+    INSERT INTO Problem_Category (Problem_Category_id, Problem_Category_Name) VALUES (1, 'Queda de Luz');
+    INSERT INTO Problem_Category (Problem_Category_id, Problem_Category_Name) VALUES (2, 'Falta de Agua');
+    
     INSERT INTO City (City_id, City_Name, State_Abbreviation) VALUES (1, 'Porto Alegre', 'RS');
     
     INSERT INTO District (District_id, District_Name, City_id) VALUES (5320129, 'Agronomia', 1);
