@@ -1,5 +1,5 @@
 import { jwtDecode } from 'jwt-decode'
-import { type UserLogin } from './userGeneric'
+import { type UserAccount, type UserCNPJ, type UserCPF, type UserLogin } from './userGeneric'
 
 const API_BANCO_DE_DADOS = 'http://localhost:5176/accounts'
 
@@ -35,49 +35,61 @@ const fetchToken = async (credentials: UserLogin) => {
   }
 }
 
-export const verifyLogin = async(token: string) => {
-    
-    const decode: any = jwtDecode(token)
+const verifyLogin = async (token: string) => {
+  const decode: any = jwtDecode(token)
 
-    console.log(decode)
+  console.log(decode)
 
-    const userId = parseInt(decode.nameid)
+  const userId = parseInt(decode.nameid)
+  const userRole = decode.role
 
-    return userId
+  return {userId, userRole}
 }
 
-export const giveAccountInfo = async(credentials: UserLogin) => {
-    
-    const token = await fetchToken(credentials)
+export const giveAccountInfo = async (credentials: UserLogin):Promise<{account: UserAccount}> => {
 
-    const userId = await verifyLogin(token)
+  const token = await fetchToken(credentials)
 
-    console.log(`Esse é o token: ${token}, e esse é o userId: ${userId}`)
+  const {userId, userRole} = await verifyLogin(token)
 
-    try{
-        
-        const response = await fetch(`${API_BANCO_DE_DADOS}/${userId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json'
-            },
-        })
+  console.log(`Esse é o token: ${token}, e esse é o userId: ${userId}`)
 
-        if(!response.ok) {
-            if(response.status === 401){
-                throw new Error("Sessão expirada.")
-            }
-            throw new Error(`Erro ao tentar dar GET nas informações de usuario: ${response.status}`)
-        }
+  try {
+    const response = await fetch(`${API_BANCO_DE_DADOS}/${userId}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    })
 
-        const data = await response.json()
-        console.log(data)
-
-        return data
-
-    }catch(e){
-        console.error("Erro ao buscar conta: ", e)
-        throw e
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Sessão expirada.')
+      }
+      throw new Error(`Erro ao tentar dar GET nas informações de usuario: ${response.status}`)
     }
+
+    const accountData = await response.json()
+    console.log(accountData)
+
+    let account: UserAccount
+
+    if(userRole === 'PersonAccount'){
+      account ={
+        ...accountData,
+        accountType: 'PersonAccount' as const
+      } as UserCPF
+    }else{
+      account = {
+        ...accountData,
+        accountType: 'BusinessAccount' as const
+      } as UserCNPJ
+    }
+
+    return {account}
+  } catch (e) {
+    console.error('Erro ao buscar conta: ', e)
+    throw e
+  }
 }

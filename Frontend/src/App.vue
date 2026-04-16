@@ -9,8 +9,8 @@ import {
 } from './scripts/maps/neighborhoodMap.ts'
 import { registrarContaCPF } from './scripts/user/userCPF.ts'
 import { registrarContaCNPJ } from './scripts/user/userCNPJ.ts'
-import type { UserGeneric, UserCPF, UserCNPJ, UserLogin } from './scripts/user/userGeneric.ts'
-import { giveAccountInfo, verifyLogin } from './scripts/user/authLogin.ts'
+import type { UserGeneric, UserCPF, UserCNPJ, UserLogin, UserAccount } from './scripts/user/userGeneric.ts'
+import { giveAccountInfo } from './scripts/user/authLogin.ts'
 
 //Variaveis de teste
 const city = ref<string>('Porto Alegre')
@@ -142,7 +142,7 @@ const loadNeighborhoodList = async (attempts = 3) => {
 
 //Variaveis de conta
 
-const currentUser = ref<UserLogin>({ nome: '', senha: '' })
+const currentUser = ref<UserAccount | null>(null)
 const loggedUser = ref(false)
 const isRegistered = ref(false)
 const razaoSocial = ref('CPF')
@@ -166,13 +166,22 @@ const registerForm = ref({
 
 const handleLogin = async () => {
   try {
-    const authData = await giveAccountInfo(loginForm.value)
+    const {account} = await giveAccountInfo(loginForm.value)
 
+    currentUser.value = account
     
-
     loggedUser.value = true
     activeTab.value = 'chat'
     console.log(`Acesso na conta de ${currentUser.value.nome} carregado com sucesso`)
+
+    if(account.accountType === 'PersonAccount') {
+      console.log("Essa é uma conta pessoal")
+    }else if(account.accountType === 'BusinessAccount'){
+      console.log("Essa é uma conta empresarial")
+    }else{
+      console.log("A conta não possui nenhum tipo")
+    }
+
   } catch (e) {
     console.error('Erro ao tentar login: ', e)
   }

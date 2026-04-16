@@ -36,4 +36,3 @@ export const registrarContaCPF = async (userData: UserCPF) => {
     throw e
   }
 }
-
