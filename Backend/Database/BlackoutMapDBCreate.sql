@@ -100,3 +100,14 @@ CREATE TABLE IF NOT EXISTS Chat_has_message  (
 	FOREIGN KEY (Message_id) REFERENCES Message(Message_id),
 	FOREIGN KEY (Chat_id) REFERENCES Chat(Chat_id)
 ); ---------------------------------------------------------------------------------------------
+
+
+CREATE TABLE IF NOT EXISTS Advertisement  (
+	Advertisement_id INTEGER PRIMARY KEY NOT NULL,
+	Valid_to_boost BOOLEAN DEFAULT(FALSE) NOT NULL,
+	UTC_last_edit INTEGER DEFAULT ( unixepoch('now') ) NOT NULL,
+	UTC_boost_ends_at INTEGER DEFAULT ( 0 ) NOT NULL,
+
+	Message_id INTEGER NOT NULL,
+	FOREIGN KEY (Message_id) REFERENCES Message(Message_id)
+); ---------------------------------------------------------------------------------------------
