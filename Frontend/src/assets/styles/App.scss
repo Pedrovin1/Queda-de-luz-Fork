@@ -308,7 +308,9 @@ body,
     border-radius: 16px;
 
     width: 25%;
-    height: 50%;
+    height: auto;
+    max-height: 700px;
+    min-height: 500px;
     padding: 20px;
     top: 40%;
     right: 10px;
@@ -408,7 +410,16 @@ body,
       display: flex;
       flex-direction: column;
       position: relative;
-      overflow: hidden;
+      overflow-y: auto;
+      padding-right: 5px;
+
+      &::-webkit-scrollbar {
+        width: 5px;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+      }
 
       .slide-enter-active,
       .slide-leave-active {
@@ -430,7 +441,8 @@ body,
         min-height: 100%;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: flex-start;
+        overflow-y: visible;
         flex: 1;
         padding: 10px 0;
 
@@ -622,10 +634,12 @@ body,
           display: flex;
           flex-direction: column;
           flex: 1;
+          gap: 15px;
+          flex-shrink: 0;
           .box-chat-profile-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 15px !important;
             background-color: rgba(255, 255, 255, 0.03);
             border-radius: 12px;
             overflow: hidden;
@@ -657,6 +671,46 @@ body,
             cursor: pointer;
             &:hover {
               background: rgba(255, 0, 0, 0.1);
+            }
+          }
+          .box-chat-profile-cnpj-container {
+            .box-chat-profile-cnpj-anuncios {
+              margin-top: 15px;
+              padding: 10px;
+              background: rgba(255, 255, 255, 0.03);
+              border-radius: 12px;
+              flex-shrink: 0;
+            }
+            .box-chat-profile-cnpj-anuncios-label {
+              font-size: 0.75rem;
+              color: #9ca5b3;
+              margin-bottom: 10px;
+              font-weight: bold;
+              text-transform: uppercase;
+            }
+            .box-chat-profile-cnpj-anuncios-album {
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+              gap: 10px;
+
+              .box-chat-profile-cnpj-slots {
+                aspect-ratio: 1 / 1;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px dashed rgba(241, 210, 69, 0.3);
+                border-radius: 8px;
+                @include display-on-center();
+
+                span {
+                  font-size: 0.6rem;
+                  color: #666;
+                  text-align: center;
+                }
+                &:hover {
+                  background-color: rgba(241, 210, 69, 0.05);
+                  border-color: rgb(241, 210, 69);
+                  cursor: pointer;
+                }
+              }
             }
           }
         }

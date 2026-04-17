@@ -217,6 +217,7 @@ const handleRegistration = async () => {
     if (razaoSocial.value === 'CPF') {
       const newUser: UserCPF = {
         ...baseData,
+        accountType: 'PersonAccount',
         cpf: razao_social,
         data_nascimento: data,
       }
@@ -225,6 +226,7 @@ const handleRegistration = async () => {
     } else {
       const newUser: UserCNPJ = {
         ...baseData,
+        accountType: 'BusinessAccount',
         cnpj: razao_social,
         data_criacao: data,
         slot_anuncio_quantidade: 3,
@@ -238,6 +240,13 @@ const handleRegistration = async () => {
   } catch (error) {
     console.error('Falha ao realizar registro:', error)
   }
+}
+
+const handleLogout = () => {
+  loggedUser.value = false
+  currentUser.value = null
+  localStorage.removeItem('userToken')
+  activeTab.value = 'chat'
 }
 
 watch(
@@ -614,7 +623,7 @@ onUnmounted(() => {
                     </tr>
                     <tr>
                       <td>Localização:</td>
-                      <td>Porto Alegre, RS</td>
+                      <td>{{ currentUser?.bairro_criacao }}</td>
                     </tr>
                     <tr>
                       <td>Status:</td>
@@ -641,7 +650,7 @@ onUnmounted(() => {
                     </tr>
                     <tr>
                       <td>Localização:</td>
-                      <td>Porto Alegre, RS</td>
+                      <td>{{ currentUser?.bairro_criacao }}</td>
                     </tr>
                     <tr>
                       <td>Status:</td>
@@ -651,11 +660,23 @@ onUnmounted(() => {
                       <td>Notificações:</td>
                       <td>Ativadas</td>
                     </tr>
+                    <tr>
+                      <td>Anúncios:</td>
+                      <td>{{ currentUser?.slot_anuncio_quantidade }}</td>
+                    </tr>
                   </tbody>
                 </table>
+                <div class="box-chat-profile-cnpj-anuncios">
+                  <p class="box-chat-profile-cnpj-anuncios-label">Produtos anunciados:</p>
+                  <div class="box-chat-profile-cnpj-anuncios-album">
+                    <div v-for="i in 3" :key="i" class="box-chat-profile-cnpj-slots">
+                      <span>Placeholder</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <button class="box-chat-viewprofile-logoutbutton" @click="loggedUser = false">
+              <button class="box-chat-viewprofile-logoutbutton" @click="handleLogout">
                 Sair da conta
               </button>
             </div>

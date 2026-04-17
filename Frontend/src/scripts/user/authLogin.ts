@@ -81,21 +81,23 @@ export const giveAccountInfo = async (credentials: UserLogin) => {
         email: publicData.email,
         telefone: '',
         data_nascimento: publicData.birthday,
-        bairro_criacao: publicData.distric_name,
+        bairro_criacao: publicData.district_Name,
         imagem_perfil_link: publicData.profile_Picture_Link,
         descricao: publicData.description,
         accountType: 'PersonAccount' as const,
       } as UserCPF
     } else {
       const publicData = accountData.business_Account_Data.public_Data
+      const privateData = accountData.business_Account_Data.private_Data
       account = {
         nome: publicData.username,
         email: publicData.email,
         telefone: '',
         cnpj: publicData.cnpj,
-        bairro_criacao: publicData.distric_name,
+        bairro_criacao: publicData.district_Name,
         imagem_perfil_link: publicData.profile_Picture_Link,
         descricao: publicData.description,
+        slot_anuncio_quantidade: privateData.advertisement_Slots_Amount,
         accountType: 'BusinessAccount' as const,
       } as UserCNPJ
     }
