@@ -77,6 +77,9 @@ Accept: application/json
 GET {{BlackoutMap_HostAddress}}/homepage/states/RS/cities
 Accept: application/json
 
+GET {{BlackoutMap_HostAddress}}/accounts/login
+Authorization: Bearer accountJWTtokenHere
+Accept: application/json
 
 POST {{BlackoutMap_HostAddress}}/accounts/login
 Content-Type: application/json

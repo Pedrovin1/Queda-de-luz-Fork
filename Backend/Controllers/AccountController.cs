@@ -77,6 +77,26 @@ public class AccountController : ControllerBase
     } 
 
     [HttpGet]
+    [Authorize]
+    [Route("login")]
+    public async Task<IActionResult> GetLoginTokenData()
+    {
+        string? clientIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        string? clientTypeClaim = User.FindFirstValue(ClaimTypes.Role);
+
+        if(clientIdClaim is null || clientTypeClaim is null){
+            return this.StatusCode(StatusCodes.Status500InternalServerError, "Invalid Token Format");
+        }
+
+        GetLoginTokenDataResponse response = new(
+            int.Parse(clientIdClaim),
+            clientTypeClaim
+        );
+
+        return Ok(response);
+    }
+
+    [HttpGet]
     [AllowAnonymous]
     [Route("{account_id}")]
     public async Task<IActionResult> GetAccountData(int account_id)
