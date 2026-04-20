@@ -1,4 +1,3 @@
-import { jwtDecode } from 'jwt-decode'
 import { type UserAccount, type UserCNPJ, type UserCPF, type UserLogin } from './userGeneric'
 
 const API_BANCO_DE_DADOS = 'http://localhost:5176/accounts'
@@ -35,26 +34,36 @@ const fetchToken = async (credentials: UserLogin) => {
   }
 }
 
-const verifyLogin = async (token: string) => {
-  const decode: any = jwtDecode(token)
+const GetLoginDataByToken = async (token: string) => {
+  try {
+    const response = await fetch(`${API_BANCO_DE_DADOS}/login`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    })
 
-  console.log(decode)
+    if (!response.ok) {
+      throw new Error('Token invalido!')
+    }
 
-  const userId = parseInt(decode.nameid)
-  const userRole = decode.role
-
-  return { userId, userRole }
+    return await response.json()
+  } catch (e) {
+    console.error('Erro ao tentar pegar informações do token:', e)
+    throw e
+  }
 }
 
 export const giveAccountInfo = async (credentials: UserLogin) => {
   const token = await fetchToken(credentials)
 
-  const { userId, userRole } = await verifyLogin(token)
+  const tokenData = await GetLoginDataByToken(token)
 
-  console.log(`Esse é o token: ${token}, e esse é o userId: ${userId}`)
+  console.log('Esse é as informações do token:', tokenData)
 
   try {
-    const response = await fetch(`${API_BANCO_DE_DADOS}/${userId}`, {
+    const response = await fetch(`${API_BANCO_DE_DADOS}/${tokenData.account_Id}`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -69,39 +78,43 @@ export const giveAccountInfo = async (credentials: UserLogin) => {
       throw new Error(`Erro ao tentar dar GET nas informações de usuario: ${response.status}`)
     }
 
-    const accountData = await response.json()
-    console.log(accountData)
+    const data = await response.json()
+
+    console.log('Informações do Id da conta:', data)
 
     let account: UserAccount
 
-    if (userRole === 'PersonAccount') {
-      const publicData = accountData.person_Account_Data.public_Data
+    if (data.business_Account_Data == null) {
+      const personData = data.person_Account_Data.public_Data
+
       account = {
-        nome: publicData.username,
-        email: publicData.email,
+        nome: personData.username,
+        email: personData.email,
         telefone: '',
-        data_nascimento: publicData.birthday,
-        bairro_criacao: publicData.district_Name,
-        imagem_perfil_link: publicData.profile_Picture_Link,
-        descricao: publicData.description,
+        data_nascimento: personData.birthday,
+        descricao: personData.description,
+        imagem_perfil_link: personData.profile_Picture_Link,
+        bairro_criacao: personData.district_Name,
+        bairro_id: personData.district_Id,
         accountType: 'PersonAccount' as const,
       } as UserCPF
     } else {
-      const publicData = accountData.business_Account_Data.public_Data
-      const privateData = accountData.business_Account_Data.private_Data
+      const businessPublicData = data.business_Account_Data.public_Data
+      const businessPrivateData = data.business_Account_Data.private_Data
+
       account = {
-        nome: publicData.username,
-        email: publicData.email,
-        telefone: '',
-        cnpj: publicData.cnpj,
-        bairro_criacao: publicData.district_Name,
-        imagem_perfil_link: publicData.profile_Picture_Link,
-        descricao: publicData.description,
-        slot_anuncio_quantidade: privateData.advertisement_Slots_Amount,
+        nome: businessPublicData.username,
+        email: businessPublicData.email,
+        cnpj: businessPublicData.cnpj,
+        descricao: businessPublicData.description,
+        imagem_perfil_link: businessPublicData.profile_Picture_Link,
+        bairro_criacao: businessPublicData.district_Name,
+        bairro_id: businessPublicData.district_Id,
+        slot_anuncio_quantidade: businessPrivateData.advertisement_Slots_Amount,
         accountType: 'BusinessAccount' as const,
       } as UserCNPJ
     }
-    console.log(account)
+
     return { account }
   } catch (e) {
     console.error('Erro ao buscar conta: ', e)

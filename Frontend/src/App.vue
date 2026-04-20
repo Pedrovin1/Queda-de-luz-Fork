@@ -9,13 +9,7 @@ import {
 } from './scripts/maps/neighborhoodMap.ts'
 import { registrarContaCPF } from './scripts/user/userCPF.ts'
 import { registrarContaCNPJ } from './scripts/user/userCNPJ.ts'
-import type {
-  UserGeneric,
-  UserCPF,
-  UserCNPJ,
-  UserLogin,
-  UserAccount,
-} from './scripts/user/userGeneric.ts'
+import type { UserGeneric, UserCPF, UserCNPJ, UserAccount } from './scripts/user/userGeneric.ts'
 import { giveAccountInfo } from './scripts/user/authLogin.ts'
 
 //Variaveis de teste
@@ -182,11 +176,11 @@ const handleLogin = async () => {
 
     loggedUser.value = true
     activeTab.value = 'chat'
-    console.log(`Acesso na conta de ${currentUser.value.nome} carregado com sucesso`)
+    console.log('Acesso a conta de: ', currentUser.value.nome)
 
-    if (currentUser.value.accountType === 'PersonAccount') {
+    if (currentUser.value?.accountType === 'PersonAccount') {
       console.log('Essa é uma conta pessoal')
-    } else if (currentUser.value.accountType === 'BusinessAccount') {
+    } else if (currentUser.value?.accountType === 'BusinessAccount') {
       console.log('Essa é uma conta empresarial')
     } else {
       console.log('A conta não possui nenhum tipo')
@@ -461,8 +455,18 @@ onUnmounted(() => {
               <Transition name="slide" mode="out-in">
                 <div v-if="isRegistered" class="box-chat-loginform">
                   <h3>Acessar a conta</h3>
-                  <input v-model="loginForm.nome" type="text" placeholder="Nome" />
-                  <input v-model="loginForm.senha" type="password" placeholder="Senha" />
+                  <input
+                    v-model="loginForm.nome"
+                    @keyup.enter="handleLogin"
+                    type="text"
+                    placeholder="Nome"
+                  />
+                  <input
+                    v-model="loginForm.senha"
+                    @keyup.enter="handleLogin"
+                    type="password"
+                    placeholder="Senha"
+                  />
                   <button class="box-chat-loginform-button" @click="handleLogin">ENTRAR</button>
                   <div class="box-chat-loginform-verifications">
                     <span class="box-chat-loginform-forgot-password">Esqueceu de sua senha?</span>
