@@ -363,8 +363,12 @@ onUnmounted(() => {
     <div class="box-news"><h1 class="placard-h1">News</h1></div>
   </div>
   <div class="below-content">
-    <button v-if="!openMenu" @click="openMenu = true" class="button-power-outage-outside">P</button>
-    <button v-if="!openChat" @click="openChat = true" class="button-chat-outside"></button>
+    <button v-if="!openMenu" @click="openMenu = true" class="button-power-outage-outside">
+      <img src="./assets/images/light_bulb.svg"/>
+    </button>
+    <button v-if="!openChat" @click="openChat = true" class="button-chat-outside" :class="{ 'shift-to-side': openMenu}">
+      <img src="./assets/images/chat.svg"/>
+    </button>
     <div class="box-report-wrapper">
       <div class="box-report-card">
         <template v-if="!isChangingReport">

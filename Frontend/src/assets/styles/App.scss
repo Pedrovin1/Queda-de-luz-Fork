@@ -72,82 +72,130 @@ body,
 
   .box-report-wrapper {
     position: absolute;
-    top: 100px;
+    top: 8vh;
     right: 20px;
-    width: 240px;
+    width: 260px;
     z-index: 15;
 
     .box-report-card {
-      padding: 15px;
-      background-color: rgba(36, 47, 62, 0.95);
+      padding: 20px;
+      background-color: $bg-color-primary;
       backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      color: #eeeeee;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 3px solid #1a1a1a;
+      border-radius: 16px;
+      color: #1a1a1a;
+      box-shadow: 0 6px 0px #b39b32,0 10px 25px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s ease-in-out;
 
       .box-report-label {
         font-size: 11px;
-        color: #9ca5b3;
+        font-weight: bold;
+        color: rgba(0,0,0,0.6);
         margin: 0;
+        text-transform: uppercase;
       }
       .box-report-neighborhood {
-        font-size: 16px;
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.2;
         margin: 5px 0 15px 0;
-        color: #00d4ff;
+        color: #1a1a1a;
       }
       .box-report-btn-main {
         width: 100%;
-        background: #ff4500;
-        color: white;
-        border: none;
-        padding: 10px;
-        border-radius: 6px;
-        font-weight: bold;
+        background: #1a1a1a;
+        color: $bg-color-primary;
+        border: 2px solid #1a1a1a;
+        padding: 12px;
+        border-radius: 8px;
+        box-shadow: 0 4px 0px #000;
+        font-weight: 800;
         cursor: pointer;
+        transition: background-color 0.8s ease, color 0.5s ease, transform 0.2s, box-shadow 0.2s;
+
         &:hover {
-          background: #e63e00;
+          background-color: #a50303;
+          color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 0px #000;
+        }
+        &:active {
+          transform: translateY(2px);
+          box-shadow: 0 6px 0px #000;
+          transition: all 0.05s;
         }
       }
       .box-report-btn-change {
         display: block;
-        margin: 10px auto 0;
+        margin: 12px auto 0;
         background: none;
         border: none;
-        color: #9ca5b3;
+        color: rgba(0,0,0,0.7);
         font-size: 11px;
+        font-weight: bold;
         text-decoration: underline;
         cursor: pointer;
+
+        &:hover {
+          color: #000;
+        }
+
       }
       .box-report-input {
         width: 100%;
-        background: #1a222c;
-        border: 1px solid #38414e;
+        background: #1a1a1a;
+        border: 2px solid #1a1a1a;
         color: white;
-        padding: 8px;
-        border-radius: 4px;
-        margin-bottom: 5px;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        font-family: inherit;
+        transition: all 0.2s ease;
+
+        &::placeholder {
+          color: rgba(255,255,255,0.5);
+        }
+
+        &:focus {
+          outline: none;
+          box-shadow: inset 0 0 0 2px $bg-color-primary;
+        }
+
       }
       .box-report-dropdown {
-        max-height: 120px;
+        max-height: 140px;
         overflow-y: auto;
         list-style: none;
         padding: 0;
         margin: 0;
+        background: #1a1a1a;
+        border-radius: 8px;
+        border: 2px solid #1a1a1a;
         &::-webkit-scrollbar {
-          width: 5px;
+          width: 6px;
         }
         &::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.2);
+          background: $bg-color-primary;
           border-radius: 10px;
         }
+        &::-webkit-scrollbar-track{
+          background: transparent;
+        }
         li {
-          padding: 8px;
+          padding: 10px 15px;
           font-size: 13px;
+          font-weight: 500;
+          color: #eee;
           cursor: pointer;
           border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          transition: all 0.2 ease;
           &:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: $bg-color-primary;
+            color: #1a1a1a;
+            font-weight: 700;
+          }
+          &:last-child{
+            border-bottom: none;
           }
         }
       }
@@ -159,24 +207,36 @@ body,
     top: 8vh;
     left: 20px;
     z-index: 3;
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
-    background: rgba(204, 195, 195, 0.85);
-    backdrop-filter: blur(12px);
+    background: $bg-color-primary;
     cursor: pointer;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(94, 91, 91, 0.5);
+    border: 3px solid #1a1a1a;
+    @include display-on-center();
+    transition: all 0.15s ease-out;
+    box-shadow: 0 6px 0px #b39b32, 0 10px 20px rgba(0,0,0,0.4);
 
     &:hover {
-      background: rgba(204, 195, 195, 1);
-      box-shadow: 0 6px 20px rgba(94, 91, 91, 0.7);
+      background-color: #1a1a1a;
+      border-color: $bg-color-primary;
+      box-shadow: 0 -6px 0px #000, 0 -10px 20px rgba(0, 0, 0, 0.6);
       transform: translateY(-2px);
+
+      img {
+        filter: brightness(0) invert(1);
+      }
+    }
+
+    &:active {
+      transform: translateY(4px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    img {
+      width: 50%;
+      height: 50%;
+      object-fit: contain;
     }
   }
 
@@ -286,24 +346,45 @@ body,
   }
   .button-chat-outside {
     position: absolute;
-    top: 82%;
-    right: 10px;
+    top: 8vh;
+    left: 100px;
     z-index: 3;
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
+    border: 3px solid #1a1a1a;
     background: rgba(204, 195, 195, 0.85);
+    background-color: $bg-color-primary;
+    box-shadow: 0 6px 0px #b39b32, 0 10px 20px rgba(0, 0, 0, 0.4);
+    @include display-on-center();
     cursor: pointer;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.3 ease;
-    box-shadow: 0 4px 15px $bg-color;
+    transition: all 0.15s ease-out;
+    
+    
     &:hover {
-      background-color: rgba(204, 195, 195, 1);
-      box-shadow: 0 6px 20px rgba(94, 91, 91, 0.7);
+      background-color: #1a1a1a;
+      border-color: $bg-color-primary;
+      box-shadow: 0 -6px 0px #000, 0 -10px 20px rgba(0, 0, 0, 0.6);
       transform: translateY(-2px);
+
+      img {
+        filter: brightness(0) invert(1);
+      }
+    }
+
+    &:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0px #b39b32, 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    &.shift-to-side{
+      left: calc(25% + 30px);
+    }
+
+    img {
+      width: 50%;
+      height: 50%;
+      object-fit: contain;
     }
   }
   .box-chat {
