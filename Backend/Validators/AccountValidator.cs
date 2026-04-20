@@ -163,4 +163,40 @@ public  class AccountValidator
         
         return (true, error);
     }
+
+
+    public async Task<(bool, RequestError?)> IsAdValidToBoostAsync(int adId)
+    {
+        RequestError? error = null;
+        using var dbContext = await this._connectionFactory.CreateConnectionAsync();
+
+        bool? result = await dbContext.QueryFirstOrDefaultAsync<bool?>(
+            """
+                SELECT Valid_to_boost 
+                FROM Advertisement 
+                WHERE Advertisement_id = @adId;
+            """,
+            new{adId = adId}
+        );
+
+        await dbContext.CloseAsync();
+
+        if(result is null){
+            error = new RequestError(
+                StatusCodes.Status404NotFound,
+                $"Advertisement [{adId}] Not Found"
+            );
+            return (false, error);
+        }
+
+        if(result == false){
+            error = new RequestError(
+                StatusCodes.Status400BadRequest,
+                $"Advertisement [{adId}] Is not allowed to be boosted"
+            );
+            return (false, error);
+        }
+
+        return (true, null);
+    }
 }

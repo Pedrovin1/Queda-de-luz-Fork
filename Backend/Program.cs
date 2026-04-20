@@ -45,6 +45,8 @@ builder.Services.AddScoped<AccountValidator>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ChatValidator>();
 builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddScoped<AdPageValidator>();
+builder.Services.AddScoped<IAdPageService, AdPageService>();
 
 //To Avoid Wasting Time for a prototype
 const string AllowAllPolicyName = "AllowAll";

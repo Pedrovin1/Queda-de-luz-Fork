@@ -283,6 +283,35 @@ public class AccountService : IAccountService
         return (response, null);
     }
 
+    public async Task<(PostBoostAdvertisementReponse?, RequestError?)> BoostAdvertisementAsync(int ad_id)
+    {
+        const int placeholder_DefaultBoostDurationDays = 30;
+
+        RequestError? error = null;
+        using var dbContext = await this._connectionFactory.CreateConnectionAsync();
+        
+        var result = await dbContext.QueryFirstAsync<PostBoostAdvertisementReponse>(
+            $"""
+                UPDATE Advertisement 
+                SET UTC_boost_ends_at = 
+                    MAX(UTC_boost_ends_at, unixepoch('now')) --To use the best money-cost time update plan
+                    -- PLUS
+                    + 
+                    ({placeholder_DefaultBoostDurationDays} * 24 * 60 * 60) --days to seconds
+                WHERE Advertisement_id = @adId
+                RETURNING
+                    Advertisement_id  AS {nameof(PostBoostAdvertisementReponse.ad_Id)}
+                    ,
+                    UTC_boost_ends_at AS {nameof(PostBoostAdvertisementReponse.utc_Boost_Ends_At)}
+            """,
+            new{adId = ad_id}
+        );
+        
+        await dbContext.CloseAsync();
+        return (result, error);
+    }
+
+
 }
 
 public interface IAccountService
@@ -291,6 +320,7 @@ public interface IAccountService
     public Task<(string, RequestError?)> LoginAccountGetTokenAsync(LoginAccountRequest loginData);
     public Task<(GetAccountDataResponse, RequestError?)> GetAccountData(int account_id, string accountType, bool includePrivateData);
     public Task<(Advertisement?, RequestError?)> PostAdvertisementAsync(PostAdvertisementRequest request, int accountId, string accountType);
+    public Task<(PostBoostAdvertisementReponse?, RequestError?)> BoostAdvertisementAsync(int ad_id);
 
     public string HashPassword(string unhashedPassword);
 }

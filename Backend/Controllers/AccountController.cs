@@ -179,4 +179,39 @@ public class AccountController : ControllerBase
         response = result!.ToPostAdvertisementResponse();
         return Ok(response);
     }
+
+    [HttpPost]
+    [Authorize]
+    [Route("{account_id}/ads/{ad_id}/boost")]
+    //Placeholder Endpoint Logic
+    public async Task<IActionResult> PostBoostAdvertisementAsync(int account_id, int ad_id)
+    {
+        RequestError? error;
+        string? clientIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? null;
+        int? parsedClientId = clientIdClaim is null ? null
+                                                    : int.Parse(clientIdClaim);
+
+        if(account_id != parsedClientId){
+            return this.StatusCode(StatusCodes.Status403Forbidden, 
+            "You Cannot Boost the Ad of another account");
+        }
+
+        (bool accountExists, var _, error) = await this._validator.AccountExistsAsync(account_id);
+        if(accountExists == false){
+            return this.StatusCode(error!.StatusCode, error.Message);
+        }
+        
+        (bool isValid, error) = await this._validator.IsAdValidToBoostAsync(ad_id);
+        if(isValid == false){
+            return this.StatusCode(error!.StatusCode, error.Message);
+        }
+
+        (PostBoostAdvertisementReponse? response, error) = await this._accountService.BoostAdvertisementAsync(ad_id);
+
+        if(error is not null){
+            return this.StatusCode(error.StatusCode, error.Message);
+        }
+
+        return Ok(response);
+    }
 }
