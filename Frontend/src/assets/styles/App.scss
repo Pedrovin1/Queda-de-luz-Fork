@@ -70,6 +70,153 @@ body,
   height: 100%;
   position: absolute;
 
+  .box-ads-tab {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 30;
+    @include display-on-center();
+
+    .box-ads-card {
+      width: 850px;
+      max-width: 95vw;
+      background-color: $bg-color-primary;
+      border: 3px solid #1a1a1a;
+      border-radius: 20px;
+      padding: 25px;
+      text-align: center;
+      box-shadow:
+        0 8px 0 #b39b32,
+        0 15px 40px rgba(0, 0, 0, 0.6);
+      transition:
+        background-color 0.8s ease,
+        color 0.5s ease,
+        transform 0.2s,
+        box-shadow 0.2s;
+
+      &:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 0px #000;
+      }
+    }
+    .ads-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      .ads-tag {
+        font-size: 0.65rem;
+        font-weight: 800;
+        background: #1a1a1a;
+        color: $bg-color-primary;
+        padding: 4px 10px;
+        border-radius: 20px;
+      }
+      .ads-close {
+        background: none;
+        border: none;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1.2rem;
+        &:hover {
+          color: red;
+        }
+      }
+    }
+    .ads-body {
+      color: #1a1a1a;
+
+      .ads-ad-grid{
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+        gap: 15px;
+        margin-bottom: 25px;
+      }
+      .ads-ad-slot{
+        aspect-ratio: 1/1;
+        background: #1a1a1a;
+        border: 2px solid #1a1a1a;
+        border-radius: 16px;
+        padding: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        @include display-on-center();
+        flex-direction: column;
+      }
+      .ads-placeholder{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        span{
+          font-size: 0.7rem;
+          font-weight: 800;
+          color: $bg-color-primary;
+        }
+        .ads-icon-mini{
+          width: 25px;
+          filter: brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(10deg);
+        }
+
+        &:hover{
+          transform: scale(1.05) translateY(-5px);
+          background: #333;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+          border-color: white;
+        }
+      }
+      h2 {
+        font-weight: 800;
+        font-size: 1.4rem;
+        margin-bottom: 10px;
+      }
+      p {
+        font-size: 0.9rem;
+        line-height: 1.4;
+        margin-bottom: 20px;
+      }
+    }
+    .ads-confirm-btn {
+      width: 100%;
+      background: #1a1a1a;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 0px #000;
+      transition: all 0.1s;
+
+      &:hover {
+        background: #333;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 0px #000;
+      }
+      &:active {
+        transform: translateY(2px);
+        box-shadow: 0 2px 0px #000;
+      }
+    }
+  }
+
+  .pop-enter-active {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .pop-leave-active {
+    transition: all 0.2s ease-in;
+  }
+  .pop-enter-from,
+  .pop-leave-to {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
   .box-report-wrapper {
     position: absolute;
     top: 8vh;
@@ -87,7 +234,17 @@ body,
       box-shadow:
         0 6px 0px #b39b32,
         0 10px 25px rgba(0, 0, 0, 0.4);
-      transition: all 0.3s ease-in-out;
+      transition:
+        background-color 0.8s ease,
+        color 0.5s ease,
+        transform 0.2s,
+        box-shadow 0.2s;
+
+      &:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 0px #000;
+      }
 
       .box-report-label {
         font-size: 11px;
@@ -341,7 +498,7 @@ body,
           border-left: 4px solid red;
           &::after {
             background-color: red;
-            box-shadow:  0 0 8px red;
+            box-shadow: 0 0 8px red;
           }
         }
 
