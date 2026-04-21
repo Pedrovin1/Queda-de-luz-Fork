@@ -165,12 +165,34 @@ public  class AccountValidator
     }
 
 
-    public async Task<(bool, RequestError?)> IsAdValidToBoostAsync(int adId)
+    public async Task<(bool, RequestError?)> IsAdValidToBoostAsync(int accountId, int adId)
     {
         RequestError? error = null;
         using var dbContext = await this._connectionFactory.CreateConnectionAsync();
 
         bool? result = await dbContext.QueryFirstOrDefaultAsync<bool?>(
+            """
+                SELECT EXISTS( 
+                    SELECT * 
+                    FROM Advertisement AS ad
+                        JOIN Message AS m ON ad.Message_id = m.Message_id
+                    WHERE 
+                        ad.Advertisement_id = @adId AND
+                        m.Base_Account_id = @accountId
+                );
+            """,
+            new{adId = adId, accountId = accountId}
+        );
+
+        if(result != true){
+            await dbContext.CloseAsync();
+            error = new RequestError(StatusCodes.Status404NotFound, 
+            $"Ad [{adId}] Not Found"
+            );
+            return (false, error);
+        }
+
+        result = await dbContext.QueryFirstOrDefaultAsync<bool?>(
             """
                 SELECT Valid_to_boost 
                 FROM Advertisement 
@@ -179,9 +201,8 @@ public  class AccountValidator
             new{adId = adId}
         );
 
-        await dbContext.CloseAsync();
-
         if(result is null){
+            await dbContext.CloseAsync();
             error = new RequestError(
                 StatusCodes.Status404NotFound,
                 $"Advertisement [{adId}] Not Found"
@@ -190,6 +211,7 @@ public  class AccountValidator
         }
 
         if(result == false){
+            await dbContext.CloseAsync();
             error = new RequestError(
                 StatusCodes.Status400BadRequest,
                 $"Advertisement [{adId}] Is not allowed to be boosted"
