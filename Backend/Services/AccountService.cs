@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Dapper;
+using Microsoft.VisualBasic;
 
 public class AccountService : IAccountService
 {
@@ -208,7 +209,57 @@ public class AccountService : IAccountService
                 businessData = bResult;
             break; 
         }
-       
+
+        //recover public and private ads of the account
+        SqlMapper.GridReader results = await dbcontext.QueryMultipleAsync(
+            $"""
+                SELECT --PUBLIC Ads
+                    ad.Advertisement_id     AS {nameof(AdvertisementSummary.ad_Id)},
+                    m.Message_text          AS {nameof(AdvertisementSummary.ad_Text)},
+                    m.Message_image_link    AS {nameof(AdvertisementSummary.ad_Image_Link)},
+                    ad.Redirect_link        AS {nameof(AdvertisementSummary.ad_Redirect_Link)},
+                    m.Is_hidden             AS {nameof(AdvertisementSummary.is_Hidden)}
+                FROM
+                    Advertisement AS ad JOIN
+                    Message AS m ON m.Message_id = ad.Message_id
+                WHERE
+                    m.Is_hidden = FALSE AND --IS HIDDEN set to FALSE
+                    m.Base_Account_id = @accountId
+                    
+                    ;
+
+                SELECT --PRIVATE Ads
+                    ad.Advertisement_id     AS {nameof(AdvertisementSummary.ad_Id)},
+                    m.Message_text          AS {nameof(AdvertisementSummary.ad_Text)},
+                    m.Message_image_link    AS {nameof(AdvertisementSummary.ad_Image_Link)},
+                    ad.Redirect_link        AS {nameof(AdvertisementSummary.ad_Redirect_Link)},
+                    m.Is_hidden             AS {nameof(AdvertisementSummary.is_Hidden)}
+                FROM
+                    Advertisement AS ad JOIN
+                    Message AS m ON m.Message_id = ad.Message_id
+                WHERE
+                    m.Is_hidden = TRUE AND --IS HIDDEN set to TRUE
+                    m.Base_Account_id = @accountId;
+            """,
+            new {accountId = account_id}
+        );
+
+        var publicAds  = await results.ReadAsync<AdvertisementSummary>() ?? Enumerable.Empty<AdvertisementSummary>();
+        var privateAds = await results.ReadAsync<AdvertisementSummary>() ?? Enumerable.Empty<AdvertisementSummary>();
+
+        if(accountType == nameof(PersonAccount)){
+            personData!.public_Data.visible_Ads.AddRange(publicAds);
+            if(includePrivateData){
+                personData!.private_Data!.hidden_Ads.AddRange(privateAds);
+            }
+        }
+        else{
+            businessData!.public_Data.visible_Ads.AddRange(publicAds);
+            if(includePrivateData){
+                businessData!.private_Data!.hidden_Ads.AddRange(privateAds);
+            }
+        }
+        
         await dbcontext.CloseAsync();
 
         GetAccountDataResponse response = new GetAccountDataResponse(personData, businessData);

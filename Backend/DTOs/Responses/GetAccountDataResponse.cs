@@ -4,6 +4,18 @@ public record GetAccountDataResponse(
 );
 //----------------------------------------------------------
 
+public record AdvertisementSummary(
+    long    ad_Id,
+    string  ad_Text,
+    string? ad_Image_Link,
+    string? ad_Redirect_Link,
+    bool    is_Hidden
+);
+
+
+
+//----------------------------------------------------------
+
 public record PersonAccountData(
     Public_PersonAccountData   public_Data,
     Private_PersonAccountData? private_Data
@@ -17,13 +29,13 @@ public record Public_PersonAccountData(
     long district_Id,
     string district_Name,
 
-    List<Advertisement> visible_Ads,
+    List<AdvertisementSummary> visible_Ads,
 
     DateOnly Birthday
 );
 public record Private_PersonAccountData(
     long advertisement_Slots_Amount,
-    List<Advertisement> hidden_Ads
+    List<AdvertisementSummary> hidden_Ads
 );
 //----------------------------------------------------------
 
@@ -40,12 +52,12 @@ public record Public_BusinessAccountData(
     long district_Id,
     string district_Name,
 
-    List<Advertisement> visible_Ads,
+    List<AdvertisementSummary> visible_Ads,
 
     string cnpj
 );
 
 public record Private_BusinessAccountData(
     long advertisement_Slots_Amount,
-    List<Advertisement> hidden_Ads
+    List<AdvertisementSummary> hidden_Ads
 );
