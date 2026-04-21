@@ -201,7 +201,7 @@ public class AccountController : ControllerBase
             return this.StatusCode(error!.StatusCode, error.Message);
         }
         
-        (bool isValid, error) = await this._validator.IsAdValidToBoostAsync(ad_id);
+        (bool isValid, error) = await this._validator.IsAdValidToBoostAsync(account_id, ad_id);
         if(isValid == false){
             return this.StatusCode(error!.StatusCode, error.Message);
         }
