@@ -397,7 +397,7 @@ public class AccountService : IAccountService
         if(accountType == nameof(PersonAccount))
         {
             string extraQuery = string.Empty;
-            if(request.person_Data!.informal_work is not null && request.person_Data!.informal_work.Trim() != string.Empty)
+            if(request.person_Data!.informal_Work is not null && request.person_Data!.informal_Work.Trim() != string.Empty)
             {
                 extraQuery =
                     """
@@ -425,8 +425,8 @@ public class AccountService : IAccountService
                         {extraQuery}
                 """,
                 new{ username = request.person_Data!.username,  email = request.person_Data.email, 
-                    description = request.person_Data.description ?? string.Empty, districtId = request.person_Data.district_id,
-                    accountId = accountId, informalWork = request.person_Data.informal_work }
+                    description = request.person_Data.description ?? string.Empty, districtId = request.person_Data.district_Id,
+                    accountId = accountId, informalWork = request.person_Data.informal_Work }
             );
         }else{
             await dbContext.ExecuteAsync(
@@ -441,7 +441,7 @@ public class AccountService : IAccountService
                         Base_account_id = @accountId;
                 """,
                 new{ username = request.business_Data!.username,  email = request.business_Data.email, 
-                    description = request.business_Data.description ?? string.Empty, districtId = request.business_Data.district_id,
+                    description = request.business_Data.description ?? string.Empty, districtId = request.business_Data.district_Id,
                     accountId = accountId}
             );
         }

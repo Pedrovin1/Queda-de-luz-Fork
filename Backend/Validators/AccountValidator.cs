@@ -319,11 +319,11 @@ public  class AccountValidator
 
         if(requestAccountType == nameof(PersonAccount) ){
             data.username = request.person_Data!.username;
-            data.districtId = request.person_Data!.district_id;
+            data.districtId = request.person_Data!.district_Id;
             data.email = request.person_Data.email;
         }else{
             data.username = request.business_Data!.username;
-            data.districtId = request.business_Data!.district_id;
+            data.districtId = request.business_Data!.district_Id;
             data.email = request.business_Data.email;
         }
 

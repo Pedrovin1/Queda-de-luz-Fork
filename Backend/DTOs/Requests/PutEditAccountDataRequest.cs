@@ -7,14 +7,14 @@ public record PutPersonDataSchema(
     string  username,
     string  email,
     string? description,
-    int     district_id,
+    int     district_Id,
 
-    string? informal_work
+    string? informal_Work
 );
 
 public record PutBusinessDataSchema(
     string  username,
     string  email,
     string? description,
-    int     district_id
+    int     district_Id
 );
